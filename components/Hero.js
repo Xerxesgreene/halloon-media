@@ -48,14 +48,14 @@ export default function Hero() {
             <SplitText
               text="A 360° Integrated"
               tag="h1"
-              className="text-5xl md:text-7xl lg:text-8xl font-bold text-forest-900 font-display leading-tight"
+              className="text-4xl md:text-5xl lg:text-8xl font-bold text-forest-900 font-display leading-tight"
             />
           )}
           {startTextAnimation && (
             <SplitText
               text="Media Consultancy"
               tag="h1"
-              className="text-5xl md:text-7xl lg:text-8xl font-bold text-forest-600 font-display leading-tight"
+              className="text-4xl md:text-5xl lg:text-8xl font-bold text-forest-600 font-display leading-tight"
             />
           )}
         </div>
