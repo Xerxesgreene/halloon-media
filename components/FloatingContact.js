@@ -25,7 +25,7 @@ export default function FloatingContact() {
       
       {/* WhatsApp */}
       <motion.a
-        href="https://wa.me/919876543210"
+        href="https://wa.me/971568056934"
         target="_blank"
         rel="noopener noreferrer"
         whileHover={{ scale: 1.1, y: -2 }}
@@ -36,7 +36,7 @@ export default function FloatingContact() {
 
       {/* Mail */}
       <motion.a
-        href="mailto:contact@halloonmedia.com"
+        href="mailto:halloonmedia@gmail.com"
         whileHover={{ scale: 1.1, y: -2 }}
         className="w-14 h-14 rounded-full bg-forest-600 flex items-center justify-center shadow-xl"
       >
