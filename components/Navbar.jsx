@@ -7,9 +7,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const navItems = [
-  { label: 'About', href: '#about' },
+  { label: 'About', href: '#about-section' },
   { label: 'Services', href: '#services' },
-  { label: 'Clients', href: '#clients' },
+  { label: 'Clients', href: '#testimonials' },
 ];
 
 export default function Navbar() {
@@ -41,11 +41,16 @@ export default function Navbar() {
           className="
             mx-auto
             rounded-full
-            bg-white/20
-            backdrop-blur-3xl
-            border border-white/30
-            shadow-[0_12px_50px_-20px_rgba(0,0,0,0.25)]
+            bg-white/10
+            backdrop-blur-md
+            border border-white/20
+            shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]
           "
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+            fontFamily: "'Outfit', sans-serif",
+          }}
         >
           <div
             className={`flex items-center justify-between transition-all duration-300 ${
@@ -53,7 +58,7 @@ export default function Navbar() {
             }`}
           >
             {/* LOGO → HOME */}
-            <Link href="/" className="flex items-center gap-4">
+            <Link href="#hero" className="flex items-center gap-4">
               <motion.div
                 whileHover={{ y: -1 }}
                 transition={{ duration: 0.25 }}
@@ -61,7 +66,7 @@ export default function Navbar() {
               >
                 <div className="relative w-10 h-10">
                   <Image
-                    src="/h1.png"
+                    src="/h3.png"
                     alt="Halloon Media"
                     fill
                     className="object-contain"
@@ -69,7 +74,7 @@ export default function Navbar() {
                   />
                 </div>
 
-                <span className="text-forest-900 font-semibold text-lg">
+                <span className="text-forest-900 font-semibold text-lg drop-shadow-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>
                   Halloon Media
                 </span>
               </motion.div>
@@ -91,7 +96,15 @@ export default function Navbar() {
                     after:scale-x-0 after:origin-left
                     hover:after:scale-x-100
                     after:transition-transform after:duration-300
+                    drop-shadow-sm
+                    hover:backdrop-blur-xl
+                    px-2 py-1 rounded-md
+                    hover:bg-white/5
                   "
+                  style={{
+                    textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    fontFamily: "'Outfit', sans-serif",
+                  }}
                 >
                   {item.label}
                 </motion.a>
@@ -111,6 +124,10 @@ export default function Navbar() {
                   hover:bg-forest-700
                   transition-all
                 "
+                style={{
+                  textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                  fontFamily: "'Outfit', sans-serif",
+                }}
               >
                 Contact Us
               </motion.a>
@@ -119,7 +136,7 @@ export default function Navbar() {
             {/* MOBILE MENU BUTTON */}
             <button
               onClick={() => setOpen(true)}
-              className="md:hidden text-forest-800"
+              className="md:hidden text-forest-800 drop-shadow-lg"
             >
               <Menu size={24} />
             </button>
@@ -136,14 +153,18 @@ export default function Navbar() {
             exit={{ opacity: 0 }}
             className="
               fixed inset-0 z-50
-              bg-white/30
-              backdrop-blur-3xl
+              bg-white/10
+              backdrop-blur-2xl
               md:hidden
             "
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              fontFamily: "'Outfit', sans-serif",
+            }}
           >
             <div className="absolute top-6 right-6">
               <button onClick={() => setOpen(false)}>
-                <X size={28} className="text-forest-800" />
+                <X size={28} className="text-forest-800 drop-shadow-lg" />
               </button>
             </div>
 
@@ -156,7 +177,11 @@ export default function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   onClick={() => setOpen(false)}
-                  className="text-3xl font-semibold text-forest-900"
+                  className="text-3xl font-semibold text-forest-900 drop-shadow-lg"
+                  style={{
+                    textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+                    fontFamily: "'Outfit', sans-serif",
+                  }}
                 >
                   {item.label}
                 </motion.a>
@@ -173,7 +198,13 @@ export default function Navbar() {
                   bg-forest-600
                   text-white text-lg font-semibold
                   shadow-xl shadow-forest-600/30
+                  hover:bg-forest-700
+                  transition-all
                 "
+                style={{
+                  textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+                  fontFamily: "'Outfit', sans-serif",
+                }}
               >
                 Contact Us
               </motion.a>

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
+import BlurFadeIn, { BlurFadeText } from './BlurFadeIn'; // Adjust path as needed
 
 export default function About() {
   const ref = useRef(null);
@@ -10,13 +11,13 @@ export default function About() {
   const services = [
     {
       title: 'Strategy',
-      desc: 'We begin with deep discovery and strategic planning. , we build a clear roadmap aligned with your business objectives.',
+      desc: 'We begin with deep discovery and strategic planning , we build a clear roadmap aligned with your business objectives.',
       icon: 'checklist',
       color: '#2D5F4D',
     },
     {
       title: 'Production',
-      desc: 'Our in-house team brings ideas to life through high-impact creative and production.',
+      desc: 'Our in-house team brings ideas to life through high-impact creative and production throughout your journey.',
       icon: 'tasks',
       color: '#47876F',
     },
@@ -37,27 +38,27 @@ export default function About() {
   return (
     <section id="about" ref={ref} className="relative py-32 px-4 bg-gradient-to-b from-[#FAF7F2] to-white">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
- <h2 className="text-4xl md:text-6xl font-semibold text-[#1F3F33] mb-6 tracking-tight">
-  <span className="text-[#47876F]">
-    Crafted media solutions
-  </span>
-  {' '}with precision.
-</h2>
+        {/* Header with Blur Fade */}
+        <BlurFadeIn delay={0.2} duration={0.8} className="text-center mb-20">
+          <h2 className="text-4xl md:text-6xl font-semibold text-[#1F3F33] mb-6 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <span className="text-[#47876F]">
+              Crafted Media Solutions
+            </span>
+            {' '}With Precision.
+          </h2>
+        </BlurFadeIn>
 
-
-        </motion.div>
-
-        {/* Service Cards */}
+        {/* Service Cards with Staggered Blur Fade */}
         <div className="grid md:grid-cols-3 gap-8">
           {services.map((service, i) => (
-            <ServiceCard key={i} service={service} index={i} isInView={isInView} />
+            <BlurFadeIn 
+              key={i} 
+              delay={0.4 + i * 0.2} 
+              duration={0.8}
+              yOffset={30}
+            >
+              <ServiceCard service={service} index={i} isInView={isInView} />
+            </BlurFadeIn>
           ))}
         </div>
       </div>
@@ -70,10 +71,7 @@ function ServiceCard({ service, index, isInView }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ delay: index * 0.2, duration: 0.6 }}
+    <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="relative group"
@@ -285,13 +283,17 @@ function ServiceCard({ service, index, isInView }) {
           )}
         </div>
 
-        {/* Card Footer */}
+        {/* Card Footer with Blur Fade */}
         <div className="p-8 bg-white">
-          <h3 className="text-2xl font-bold text-[#1F3F33] mb-3">{service.title}</h3>
-          <p className="text-[#3E6B5C] leading-relaxed">{service.desc}</p>
+          <BlurFadeIn delay={0.6 + index * 0.2} duration={0.6} yOffset={15}>
+            <h3 className="text-2xl font-bold text-[#1F3F33] mb-3" style={{ fontFamily: "'Outfit', sans-serif" }}>{service.title}</h3>
+          </BlurFadeIn>
+          <BlurFadeIn delay={0.7 + index * 0.2} duration={0.6} yOffset={15}>
+            <p className="text-[#3E6B5C] leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{service.desc}</p>
+          </BlurFadeIn>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -469,7 +471,7 @@ function ChecklistAnimation() {
               />
             </svg>
           </motion.div>
-          <span className="text-[#1F3F33] font-semibold text-lg">{text}</span>
+          <span className="text-[#1F3F33] font-semibold text-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>{text}</span>
         </motion.div>
       ))}
     </div>
@@ -496,9 +498,9 @@ function TasksAnimation() {
           className="bg-white p-5 rounded-2xl shadow-xl border-2 border-gray-100"
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <h4 className="font-bold text-[#1F3F33] mb-3 text-lg">{task.name}</h4>
+          <h4 className="font-bold text-[#1F3F33] mb-3 text-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>{task.name}</h4>
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-2 text-gray-500 text-sm">
+            <span className="flex items-center gap-2 text-gray-500 text-sm" style={{ fontFamily: "'Outfit', sans-serif" }}>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -507,6 +509,7 @@ function TasksAnimation() {
             <motion.span 
               className="px-3 py-1.5 rounded-full text-xs font-bold"
               style={{ 
+                fontFamily: "'Outfit', sans-serif",
                 backgroundColor: `${task.color}20`,
                 color: task.color 
               }}

@@ -26,7 +26,11 @@ export default function IntroLoader({ onComplete }) {
           initial={{ opacity: 1, filter: 'blur(0px)' }}
           exit={{ opacity: 0, filter: 'blur(10px)' }}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-[100] bg-gradient-to-br from-cream-50 via-white to-cream-100 flex items-center justify-center"
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          style={{ 
+            background: 'linear-gradient(135deg, #f5f3ed 0%, #ffffff 50%, #f5f3ed 100%)',
+            fontFamily: "'Outfit', sans-serif",
+          }}
         >
           {/* Main Content Container */}
           <div className="flex items-center gap-4 md:gap-6">
@@ -61,7 +65,7 @@ export default function IntroLoader({ onComplete }) {
                   delay: 0.5,
                 }}
               >
-                <h1 className="text-3xl md:text-5xl font-bold text-forest-900 tracking-tight whitespace-nowrap">
+                <h1 className="text-3xl md:text-5xl font-bold text-forest-green-900 tracking-tight whitespace-nowrap" style={{ fontFamily: "'Outfit', sans-serif" }}>
                   {'Halloon Media'.split('').map((char, i) => (
                     <motion.span
                       key={i}

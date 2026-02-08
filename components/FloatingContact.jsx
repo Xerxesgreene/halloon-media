@@ -21,7 +21,7 @@ export default function FloatingContact() {
   };
 
   return (
-    <div className="fixed right-6 bottom-24 z-[999] flex flex-col items-center gap-4">
+    <div id="FloatingContact" className="fixed right-6 bottom-24 z-[999] flex flex-col items-center gap-4">
       
       {/* WhatsApp */}
       <motion.a

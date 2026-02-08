@@ -30,7 +30,7 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx"
-, "components/FloatingContact.js"  ],
+, "components/FloatingContact.jsx", "components/AnimatedBoxes.js", "components/SplitText.jsx", "components/Aboutsection.jsx"  ],
   "exclude": [
     "node_modules"
   ]

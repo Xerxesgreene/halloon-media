@@ -2,11 +2,14 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import BlurFadeIn, { BlurFadeText, BlurFadeStagger } from './BlurFadeIn';
 
 /* ─────────────────────────────────────────────
    CSS-ONLY ANIMATED BACKGROUND (zero JS per frame)
    ───────────────────────────────────────────── */
 const bgStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap');
+  
   @keyframes blob1 {
     0%,100% { transform: translate(0px, 0px) scale(1); }
     33%     { transform: translate(60px, -40px) scale(1.15); }
@@ -110,7 +113,7 @@ const services = [
     title: 'Brand Development',
     tagline: 'Build a brand that commands attention and earns loyalty.',
     description:
-      'We craft identities that transcend aesthetics. From your core positioning and competitive strategy to every visual touchpoint — we engineer brands that resonate deeply with your audience and stand apart in crowded markets. Our identity systems are built for longevity, scalability, and impact across every medium.',
+      'We craft identities that transcend aesthetics. From core positioning to every visual touchpoint, we engineer brands that resonate deeply and stand apart in crowded markets.',
     features: ['Logo & Monogram Design', 'Brand Strategy & Positioning', 'Style Guides & Brand Books', 'Tone of Voice & Messaging'],
     image: '/services/1.png',
     color: '#2D5F4D',
@@ -120,7 +123,7 @@ const services = [
     title: 'Digital Solutions',
     tagline: 'Turn digital channels into measurable growth engines.',
     description:
-      'From search intent to social engagement, we build data-driven digital ecosystems that attract, nurture, and convert your ideal customers. Our integrated approach combines SEO, paid media, content strategy, and brand activation into a unified system — optimised continuously for performance and ROI.',
+      'We build data-driven digital ecosystems that attract, nurture, and convert your ideal customers. Our integrated approach combines SEO, paid media, and content strategy into a unified system.',
     features: ['Social Media Strategy', 'SEO & Content Marketing', 'Paid Ads & Retargeting', 'Lead Generation Funnels', 'Brand Activation Campaigns'],
     image: '/services/2.png',
     color: '#47876F',
@@ -130,7 +133,7 @@ const services = [
     title: 'Video Production',
     tagline: 'Stories told with vision. Content that moves people to act.',
     description:
-      'End-to-end video production — from concept and scripting through to on-location shooting, post-production, and final delivery. We produce commercials, corporate films, explainer videos, and social-native content that captivates audiences and reinforces your brand narrative across every screen.',
+      'End-to-end video production from concept to final delivery. We produce commercials, corporate films, and social content that captivates audiences and reinforces your brand narrative.',
     features: ['Commercial Advertisements', 'Corporate & Brand Films', 'Social-Native Content', 'Motion Graphics & Animation', 'Full Post-Production'],
     image: '/services/3.png',
     color: '#5A9B82',
@@ -140,7 +143,7 @@ const services = [
     title: 'OOH Advertising',
     tagline: 'Own the streets. Dominate the skyline.',
     description:
-      'Outdoor advertising that stops people in their tracks. We design and deploy high-impact campaigns across billboards, transit networks, digital screens, and urban spaces — engineered to maximise reach, recall, and brand presence wherever your audience moves through the physical world.',
+      'Outdoor advertising that stops people in their tracks. We design and deploy high-impact campaigns across billboards, transit networks, and digital screens.',
     features: ['Billboard & Hoarding Design', 'Transit & Bus Wrap Campaigns', 'Digital Screen Networks', 'Taxi & Vehicle Branding', 'Urban Space Activations'],
     image: 'services/4.png',
     color: '#6DB095',
@@ -150,7 +153,7 @@ const services = [
     title: 'Events & Activities',
     tagline: 'Create moments. Build connections. Leave an impression.',
     description:
-      'From intimate product launches to large-scale corporate gatherings and brand experiences — we conceptualise, plan, and execute events that captivate attendees and amplify your message. Every detail is choreographed to create memorable touchpoints and drive tangible business outcomes.',
+      'From intimate product launches to large-scale corporate gatherings, we conceptualize and execute events that captivate attendees and amplify your message.',
     features: ['Corporate Events & Conferences', 'Product Launch Experiences', 'Trade Shows & Exhibitions', 'Brand Activation & Pop-ups', 'Entertainment & Cultural Shows'],
     image: 'services/5.png',
     color: '#80C4A8',
@@ -160,7 +163,7 @@ const services = [
     title: 'Website Solutions',
     tagline: 'Digital presence that converts visitors into advocates.',
     description:
-      'We design and develop websites that are as performant as they are beautiful. Custom-built platforms, high-conversion e-commerce stores, and content-managed sites — engineered with user experience at the core. From initial wireframe to ongoing maintenance, we build digital assets that drive real business results.',
+      'We design and develop websites that are as performant as they are beautiful. Custom platforms, e-commerce stores, and content-managed sites engineered with user experience at the core.',
     features: ['UI/UX Design & Prototyping', 'Custom Web Development', 'E-commerce Platforms', 'CMS Integration & Management', 'Performance & Maintenance'],
     image: 'services/6.png',
     color: '#93D8BB',
@@ -188,62 +191,33 @@ export default function ServicesWaypoint() {
       className="relative overflow-hidden"
       style={{
         background: '#FAF7F2',
-        paddingTop: '140px',
-        paddingBottom: '180px',
+        paddingTop: '160px',
+        paddingBottom: '200px',
       }}
     >
       {/* Animated ambient background */}
       <AmbientBackground />
 
-      {/* Curved top edge */}
-      <div className="absolute top-0 left-0 w-full h-56 overflow-hidden z-0">
-        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="absolute bottom-0 w-full h-full">
-          <path d="M0,80 C240,120 480,120 720,90 960,60 1200,40 1440,60 L1440,0 L0,0 Z" fill="#EFEBE5" />
-        </svg>
-      </div>
-
-      
-
-      {/* Header */}
-      <div className="relative z-10 mb-[120px]">
-        <div className="max-w-5xl mx-auto text-center px-6">       
-
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="mt-6"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 'clamp(2.8rem, 6vw, 5rem)',
-              fontWeight: 700,
-              color: '#1F3F33',
-              lineHeight: 1.1,
-            }}
-          >
-            Our{' '}
-            <span style={{ color: '#47876F', fontStyle: 'normal' }}>Services</span>
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-6 max-w-2xl mx-auto"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '1.05rem',
-              color: '#4A7A6A',
-              lineHeight: 1.8,
-            }}
-          >
-            End-to-end creative and strategic solutions — built to elevate your brand, 
-            engage your audience, and deliver measurable impact at every touchpoint.
-          </motion.p>
-
-          <div className="mt-10 h-px w-40 mx-auto" style={{ background: 'linear-gradient(to right, transparent, #47876F, transparent)', opacity: 0.4 }} />
+      {/* Section Header - "Explore Our Services" */}
+      <div className="relative z-10 mb-24 md:mb-40">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
+          <BlurFadeIn delay={0} duration={0.8} yOffset={40} blur={12}>
+            <span className="inline-block text-sm font-medium tracking-widest uppercase mb-6" style={{ fontFamily: "'Outfit', sans-serif", color: '#5eb083', letterSpacing: '3px' }}>
+              OUR SERVICES
+            </span>
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-semibold leading-tight tracking-tight mb-6" style={{ 
+              fontFamily: "'Outfit', sans-serif",
+              background: 'linear-gradient(90deg, #47876F 0%, #47876F 45%, #1F3F33 55%, #1F3F33 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              Complete Solutions For Every Need
+            </h2>
+            <p className="text-lg md:text-xl text-[#4A7A6A] max-w-3xl mx-auto leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              From brand strategy to digital execution, we offer end-to-end services designed to elevate your brand and drive meaningful growth.
+            </p>
+          </BlurFadeIn>
         </div>
       </div>
 
@@ -254,16 +228,18 @@ export default function ServicesWaypoint() {
             <ServiceCard service={service} index={index} />
             {/* Divider between cards */}
             {index < services.length - 1 && (
-              <div className="flex items-center justify-center" style={{ height: '240px' }}>
-                <motion.div
-                  initial={{ width: 0, opacity: 0 }}
-                  whileInView={{ width: '180px', opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                  className="h-px"
-                  style={{ background: 'linear-gradient(to right, transparent, #fbfffd, transparent)' }}
-                />
-              </div>
+              <BlurFadeIn delay={index * 0.15 + 0.4} duration={0.8}>
+                <div className="flex items-center justify-center" style={{ height: '300px' }}>
+                  <motion.div
+                    initial={{ width: 0, opacity: 0 }}
+                    whileInView={{ width: '180px', opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="h-px"
+                    style={{ background: 'linear-gradient(to right, transparent, #fbfffd, transparent)' }}
+                  />
+                </div>
+              </BlurFadeIn>
             )}
           </div>
         ))}
@@ -324,13 +300,17 @@ function ServiceCard({ service, index }) {
     { stiffness: 60, damping: 25 }
   );
   
-  // Fade in/out at viewport edges
-  const opacity = useTransform(cardScrollProgress, [0, 0.15, 0.85, 1], [0.2, 1, 1, 0.2]);
+  // Fade in/out at viewport edges - FIXED FOR MOBILE
+  const opacity = useTransform(
+    cardScrollProgress, 
+    [0, 0.15, 0.85, 1], 
+    isMobile ? [1, 1, 1, 1] : [0.2, 1, 1, 0.2]
+  );
 
   const isLeft = service.position === 'left';
 
   const cardMotionStyle = isMobile
-    ? { transformStyle: 'preserve-3d' }
+    ? { transformStyle: 'preserve-3d', opacity: 1 }
     : {
         rotateY,
         rotateX,
@@ -341,16 +321,17 @@ function ServiceCard({ service, index }) {
       };
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className={`flex flex-col md:flex-row items-center gap-10 md:gap-20 ${
-        isLeft ? '' : 'md:flex-row-reverse'
-      }`}
-    >
+    <BlurFadeIn delay={index * 0.15} duration={0.9} yOffset={60} blur={12}>
+      <motion.div
+        ref={cardRef}
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        className={`flex flex-col md:flex-row items-center gap-12 md:gap-28 ${
+          isLeft ? '' : 'md:flex-row-reverse'
+        }`}
+      >
       {/* ── IMAGE CARD WITH 3D ROTATION ── */}
       <div
         ref={imageCardRef}
@@ -361,6 +342,8 @@ function ServiceCard({ service, index }) {
           onHoverStart={() => setHovered(true)}
           onHoverEnd={() => setHovered(false)}
           style={cardMotionStyle}
+          whileHover={isMobile ? {} : { scale: 1.05 }}
+          transition={{ duration: 0.4 }}
           className="relative rounded-3xl overflow-hidden shadow-2xl cursor-pointer"
         >
           <div className="relative" style={{ paddingBottom: '133.33%' }}>
@@ -395,120 +378,96 @@ function ServiceCard({ service, index }) {
             <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-between text-white">
               {/* Bottom text */}
               <div className="mt-auto">
-                
-                <h4
-                  className="font-bold"
-                  style={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: 'clamp(1.3rem, 2.6vw, 1.7rem)',
-                    transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
-                    transition: 'transform 0.4s ease',
-                  }}
-                >
-                  {service.title}
-                </h4>
+                <BlurFadeIn delay={0.3} duration={0.6} blur={6} yOffset={15}>
+                  <h4
+                    className="font-bold text-2xl text-white"
+                    style={{
+                      fontFamily: "'Outfit', sans-serif",
+                      transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+                      transition: 'transform 0.4s ease',
+                    }}
+                  >
+                    {service.title}
+                  </h4>
+                </BlurFadeIn>
                 {/* Hover reveal: tagline */}
-                <p
-                  className="mt-2 text-sm overflow-hidden"
+                <div
+                  className="overflow-hidden"
                   style={{
-                    fontFamily: "'Inter', sans-serif",
-                    color: 'rgba(255,255,255,0.75)',
-                    maxHeight: hovered ? '60px' : '0',
-                    opacity: hovered ? 1 : 0,
-                    transition: 'max-height 0.45s ease, opacity 0.4s ease',
+                    maxHeight: hovered ? '80px' : '0',
+                    transition: 'max-height 0.45s ease',
                   }}
                 >
-                  {service.tagline}
-                </p>
+                  <p
+                    className="mt-2 text-base"
+                    style={{
+                      fontFamily: "'Outfit', sans-serif",
+                      color: 'rgba(255,255,255,0.9)',
+                      opacity: hovered ? 1 : 0,
+                      transition: 'opacity 0.4s ease',
+                    }}
+                  >
+                    {service.tagline}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* ── TEXT CONTENT ── */}
+      {/* ── TEXT CONTENT - PREMIUM STYLING ── */}
       <div
-        className="w-full md:flex-1 text-center md:text-left"
-        style={{ maxWidth: '520px', margin: '0 auto' }}
+        className="w-full md:flex-1 px-4 md:px-0"
+        style={{ maxWidth: '640px' }}
       >
-        {/* Title */}
-        <motion.h3
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="mb-3"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 'clamp(1.9rem, 3.5vw, 2.6rem)',
-            fontWeight: 700,
-            color: '#1F3F33',
-            lineHeight: 1.2,
-          }}
-        >
-          {service.title}
-        </motion.h3>
+        {/* Title - Bold and impactful like reference */}
+        <BlurFadeIn delay={0.1} duration={0.8} yOffset={30}>
+          <h3
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#1F3F33] leading-[1.15] tracking-tight mb-5"
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              textAlign: 'left',
+            }}
+          >
+            {service.title}
+          </h3>
+        </BlurFadeIn>
 
-        {/* Tagline */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-4"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: '1.2rem',
-            fontStyle: 'italic',
-            color: service.color,
-            lineHeight: 1.5,
-          }}
-        >
-          {service.tagline}
-        </motion.p>
+        {/* Description - Clean, readable body text */}
+        <BlurFadeIn delay={0.2} duration={0.7} yOffset={25}>
+          <p
+            className="text-base md:text-lg text-[#6B7280] leading-relaxed mb-7"
+            style={{
+              fontFamily: "'Outfit', sans-serif",
+              textAlign: 'left',
+              maxWidth: '100%',
+            }}
+          >
+            {service.description}
+          </p>
+        </BlurFadeIn>
 
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mb-6"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: '0.95rem',
-            color: '#4A7A6A',
-            lineHeight: 1.9,
-          }}
-        >
-          {service.description}
-        </motion.p>
-
-        {/* Feature pills */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex flex-wrap gap-2.5 justify-center md:justify-start"
-        >
-          {service.features.map((f, i) => (
-            <FeaturePill key={i} label={f} color={service.color} delay={i * 0.06} />
+        {/* Feature List - Clean, minimalist style */}
+        <BlurFadeStagger staggerDelay={0.08} duration={0.5} yOffset={20} blur={8}>
+          {service.features.map((feature, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-3 text-left mb-2"
+            >
+              <span 
+                className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-2"
+                style={{ backgroundColor: service.color }}
+              />
+              <span className="text-[#1F3F33] text-sm md:text-base leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                {feature}
+              </span>
+            </div>
           ))}
-        </motion.div>
-
-        {/* CTA link */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.55 }}
-          className="mt-8 flex justify-center md:justify-start"
-        >
-          <CTALink color={service.color} />
-        </motion.div>
+        </BlurFadeStagger>
       </div>
     </motion.div>
+    </BlurFadeIn>
   );
 }
 
@@ -525,12 +484,9 @@ function FeaturePill({ label, color, delay }) {
       transition={{ duration: 0.4, delay }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="inline-block px-4 py-2 rounded-full cursor-default"
+      className="inline-block px-4 py-2 rounded-full cursor-default text-sm font-semibold"
       style={{
-        fontFamily: "'Inter', sans-serif",
-        fontSize: '0.82rem',
-        fontWeight: 600,
-        letterSpacing: '0.04em',
+        fontFamily: "'Outfit', sans-serif",
         background: hovered ? color : '#E7EFEA',
         color: hovered ? '#fff' : '#2D5F4D',
         boxShadow: hovered ? `0 4px 18px ${color}40` : 'none',
@@ -556,12 +512,9 @@ function CTALink({ color }) {
       style={{ color }}
     >
       <span
+        className="text-sm font-semibold uppercase"
         style={{
-          fontFamily: "'Inter', sans-serif",
-          fontSize: '0.85rem',
-          fontWeight: 600,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
+          fontFamily: "'Outfit', sans-serif",
           borderBottom: hovered ? `2px solid ${color}` : '2px solid transparent',
           paddingBottom: '2px',
           transition: 'border-color 0.3s ease',
@@ -583,7 +536,7 @@ function CTALink({ color }) {
           transition: 'transform 0.3s ease',
         }}
       >
-        <path d="M3 9h12M11 5l4 4-4 4" />
+        <path d="M 3 9h12M11 5l4 4-4 4" />
       </svg>
     </div>
   );
