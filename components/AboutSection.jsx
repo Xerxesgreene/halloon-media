@@ -38,7 +38,7 @@ export default function AboutSection() {
 
                 <BlurFadeIn delay={0.5} duration={0.8}>
                   <p className="about-text">
-                    Bringing the best solutions in Dubai, Riyadh, Doha, Kuwait City, and Mumbai, we bring local expertise with global standards to every project we undertake.
+                    Bringing the best solutions in Dubai, KSA, Qatar, Kuwait, and India, we bring local expertise with global standards to every project we undertake.
                   </p>
                 </BlurFadeIn>
               </div>
