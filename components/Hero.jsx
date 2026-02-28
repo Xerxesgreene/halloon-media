@@ -115,6 +115,7 @@ export default function Hero({ introDone }) {
           display: flex;
           flex-direction: column;
           align-items: center;
+          /* ✅ overlap next section by 3px to kill the gap line for good */
           margin-bottom: -3px;
           padding-bottom: 3px;
         }
@@ -141,6 +142,7 @@ export default function Hero({ introDone }) {
           text-align: center;
           pointer-events: none;
           width: 100%;
+          /* ✅ don't grow — let it sit naturally at top */
           flex-shrink: 0;
         }
 
@@ -226,20 +228,20 @@ export default function Hero({ introDone }) {
 
         .h-btn-icon { display: none; }
 
-        /* Desktop: halloon-and-cta pushed to bottom via mt-auto */
-        #halloon-and-cta {
-          width: 100%;
-          margin-top: auto;
-        }
-
+        /* ✅ Halloon: use mt-auto to push it to the BOTTOM of the flex column
+           This guarantees max distance from the button regardless of vh */
         #halloon-layer {
           position: relative;
           width: 100%;
+          /* mt-auto pushes it all the way to the bottom */
+          margin-top: auto;
+          /* A little extra gap between button and Halloon */
           padding-top: 20px;
           height: calc(100vw * 0.22);
           z-index: 2;
           pointer-events: none;
           flex-shrink: 0;
+          /* ✅ extend 3px below so it overlaps and hides gap line */
           margin-bottom: -3px;
         }
 
@@ -284,14 +286,14 @@ export default function Hero({ introDone }) {
             align-items: center;
             justify-content: flex-start;
             padding-bottom: 0;
-            margin-bottom: 0;
+            margin-bottom: -3px;
           }
 
           .corner-mark { display: none; }
           .tl-eyebrow  { display: none; }
 
           #hero-content {
-            padding: 110px 20px 0 20px;
+            padding: 90px 20px 0 20px;
             align-items: center;
             text-align: center;
             pointer-events: all;
@@ -339,7 +341,6 @@ export default function Hero({ introDone }) {
             border: none;
             padding: 0;
             margin-top: 18px;
-            margin-bottom: 40px;
             opacity: 0.75;
             pointer-events: all;
           }
@@ -354,24 +355,14 @@ export default function Hero({ introDone }) {
             flex-shrink: 0;
           }
 
-          /* ✅ KEY FIX: remove auto margin on mobile so no gap below button */
-          #halloon-and-cta {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            margin-top: 0 !important;
-            margin-bottom: 0;
-            padding-bottom: 0;
-          }
-
           #halloon-layer {
+            /* On mobile, back to relative flow — no mt-auto needed */
             position: relative !important;
             margin-top: 24px !important;
             padding-top: 0 !important;
             width: 100vw;
             height: calc(100vw * 0.36);
-            margin-bottom: 0;
+            margin-bottom: -3px;
             z-index: 2;
           }
 
@@ -390,6 +381,14 @@ export default function Hero({ introDone }) {
             mask-repeat: no-repeat;
             mask-position: center center;
             mask-size: 100% auto;
+          }
+
+          #halloon-and-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 0;
           }
         }
       `}</style>
@@ -446,8 +445,8 @@ export default function Hero({ introDone }) {
           </button>
         </motion.div>
 
-        {/* ✅ marginTop removed from inline style — controlled by CSS only */}
-        <div id="halloon-and-cta">
+        {/* Halloon — mt-auto on desktop pushes it to bottom of the 100svh container */}
+        <div id="halloon-and-cta" style={{ width: '100%', marginTop: 'auto' }}>
           <motion.div
             id="halloon-layer"
             initial={{ opacity: 0 }}
