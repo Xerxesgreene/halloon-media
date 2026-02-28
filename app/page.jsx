@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
 import IntroLoader from '../components/Introloader';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -15,55 +14,45 @@ import Testimonials from '../components/Testimonials';
 import Works from '../components/Works';
 import FloatingContact from '../components/FloatingContact';
 import AboutSection from '../components/AboutSection';
-
+import HeroSection from '../components/Cupsection';
 
 export default function Home() {
   const [loaderComplete, setLoaderComplete] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
     <>
       {/* Intro Loader */}
       <IntroLoader onComplete={() => setLoaderComplete(true)} />
 
-      {/* Main Content - rendered immediately but initially hidden */}
-      <div 
-        className="bg-cream-200 text-forest-800 min-h-screen overflow-x-hidden"
-        style={{ 
+      {/* Main Content */}
+      <div
+        className="bg-cream-200 text-forest-800 min-h-screen"
+        style={{
           opacity: loaderComplete ? 1 : 0,
           transition: 'opacity 0.6s ease-in-out',
-          backgroundColor: '#f5f3ed' // Match the beige background
+          backgroundColor: '#f5f3ed',
         }}
       >
         <Navbar />
         <Hero introDone={loaderComplete} />
         <ClientMarquee />
+        <HeroSection />
         <About />
         <ServicesWaypoint />
-        <Works />   
+        <Works />
         <Testimonials />
         <AboutSection />
-        <WhyChooseUs/>
+        <WhyChooseUs />
         <CTASection />
         <Footer />
       </div>
 
-      {/* Floating WhatsApp + Mail - shows after loader */}
-      {loaderComplete && <FloatingContact />}
-
-     
+      {/*
+        FloatingContact uses createPortal to render directly on document.body,
+        completely outside #smooth-wrapper. It polls ScrollSmoother via
+        gsap.ticker so it works correctly with GSAP ScrollSmoother.
+      */}
+      <FloatingContact />
     </>
   );
 }

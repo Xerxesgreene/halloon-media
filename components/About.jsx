@@ -1,639 +1,369 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
-import BlurFadeIn, { BlurFadeText } from './BlurFadeIn'; // Adjust path as needed
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { motion, useInView } from 'framer-motion';
+import Lottie from 'lottie-react';
+import BlurFadeIn from './BlurFadeIn';
 
-export default function About() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  const services = [
-    {
-      title: 'Strategy',
-      desc: 'We begin with deep discovery and strategic planning , we build a clear roadmap aligned with your business objectives.',
-      icon: 'checklist',
-      color: '#2D5F4D',
-    },
-    {
-      title: 'Production',
-      desc: 'Our in-house team brings ideas to life through high-impact creative and production throughout your journey.',
-      icon: 'tasks',
-      color: '#47876F',
-    },
-    {
-      title: 'Execution',
-      desc: 'With regional expertise across the GCC, we ensure consistent brand performance and long-term visibility.',
-      icon: 'folder',
-      color: '#2D5F4D',
-      showFolder: true,
-      folderImages: [
-        'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1547658719-da2b51169166?w=500&h=400&fit=crop',
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=400&fit=crop',
-      ]
-    }
-  ];
-
-  return (
-    <section id="about" ref={ref} className="relative py-32 px-4 bg-gradient-to-b from-[#FAF7F2] to-white">
-      <div className="max-w-7xl mx-auto">
-        {/* Header with Blur Fade */}
-        <BlurFadeIn delay={0.2} duration={0.8} className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-semibold text-[#1F3F33] mb-6 tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
-            <span className="text-[#47876F]">
-              Crafted Media Solutions
-            </span>
-            {' '}With Precision.
-          </h2>
-        </BlurFadeIn>
-
-        {/* Service Cards with Staggered Blur Fade */}
-        <div className="grid md:grid-cols-3 gap-8">
-          {services.map((service, i) => (
-            <BlurFadeIn 
-              key={i} 
-              delay={0.4 + i * 0.2} 
-              duration={0.8}
-              yOffset={30}
-            >
-              <ServiceCard service={service} index={i} isInView={isInView} />
-            </BlurFadeIn>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+function LottieCard({ src }) {
+  const [animData, setAnimData] = useState(null);
+  useEffect(() => {
+    fetch(src).then(r => r.json()).then(setAnimData).catch(console.error);
+  }, [src]);
+  if (!animData) return <div style={{ width: 160, height: 160 }} />;
+  return <Lottie animationData={animData} loop autoplay style={{ width: 160, height: 160 }} />;
 }
 
-/* ---------------- SERVICE CARD WITH HOVER ANIMATION ---------------- */
-function ServiceCard({ service, index, isInView }) {
-  const [isHovered, setIsHovered] = useState(false);
+const services = [
+  {
+    title: 'Strategy', label: '01',
+    desc: 'We chart the course. Deep-dive brand audits, market mapping, and a clear north star that aligns every decision you make.',
+    src: '/animations/ani1.json', accent: '#2D5F4D', color: '#78c69a',
+  },
+  {
+    title: 'Process', label: '02',
+    desc: 'Structured workflows, collaborative frameworks, and repeatable systems that keep your brand consistent at every touchpoint.',
+    src: '/animations/ani2.json', accent: '#47876F', color: '#5eb083',
+  },
+  {
+    title: 'Execution', label: '03',
+    desc: 'We launch, manage, and optimise. From campaigns to content to conversions — delivered with precision and speed.',
+    src: '/animations/ani3.json', accent: '#5A9B82', color: '#3d9e6b',
+  },
+];
 
-  return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative group"
-    >
-      {/* Main Card */}
-      <div className="relative bg-white border-2 border-[#E7EFEA] rounded-3xl overflow-hidden hover:border-[#47876F] hover:shadow-2xl transition-all duration-500">
-        
-        {/* Content Area with Grid Background */}
-        <div 
-          className="relative h-96 flex items-center justify-center overflow-visible p-8"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #E0E7E3 1px, transparent 1px),
-              linear-gradient(to bottom, #E0E7E3 1px, transparent 1px)
-            `,
-            backgroundSize: '20px 20px'
-          }}
-        >
-          
-          {/* Show Interactive Icons (First Two Cards) */}
-          {!service.showFolder && (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                {!isHovered ? (
-                  <motion.div
-                    key="icon"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8, rotateY: 90 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <InteractiveIcon icon={service.icon} color={service.color} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="3d-animation"
-                    initial={{ opacity: 0, scale: 0.8, rotateY: -90 }}
-                    animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-full h-full flex items-center justify-center"
-                  >
-                    {service.icon === 'checklist' && <ChecklistAnimation />}
-                    {service.icon === 'tasks' && <TasksAnimation />}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+function MagneticCard({ s, i, isInView }) {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50 });
+  const [hovered, setHovered] = useState(false);
+  const rafRef = useRef(null);
 
-          {/* Show Folder with Images (Third Card) */}
-          {service.showFolder && (
-            <div className="relative w-full h-full flex items-center justify-center">
-              {/* Folder - Always Visible */}
-              <motion.div
-                animate={isHovered ? {
-                  scale: 0.7,
-                  y: 40,
-                } : {
-                  scale: 1,
-                  y: 0,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 20
-                }}
-                className="relative z-10"
-              >
-                <GreenFolderIcon isOpen={isHovered} />
-              </motion.div>
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const rect = cardRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      const px = ((e.clientX - rect.left) / rect.width) * 100;
+      const py = ((e.clientY - rect.top) / rect.height) * 100;
+      setTilt({ x: dy * -10, y: dx * 10 });
+      setSpotlight({ x: px, y: py });
+    });
+  }, []);
 
-              {/* Images Popping Out - Only on Hover */}
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    {/* Images Opening Like Files */}
-                    <div className="relative w-full h-full flex items-start justify-center pt-8">
-                      {/* Left Image */}
-                      <motion.div
-                        initial={{ 
-                          opacity: 0,
-                          x: 0,
-                          y: 80,
-                          rotateZ: 0,
-                          scale: 0.3
-                        }}
-                        animate={{ 
-                          opacity: 1,
-                          x: -100,
-                          y: -20,
-                          rotateZ: -15,
-                          scale: 0.85
-                        }}
-                        exit={{
-                          opacity: 0,
-                          x: 0,
-                          y: 80,
-                          rotateZ: 0,
-                          scale: 0.3
-                        }}
-                        transition={{ 
-                          delay: 0.1,
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 18
-                        }}
-                        className="absolute w-44 h-36 rounded-2xl overflow-hidden shadow-2xl border-4 border-white"
-                        style={{ zIndex: 20 }}
-                      >
-                        <img 
-                          src={service.folderImages[0]} 
-                          alt="Project 1"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20" />
-                      </motion.div>
-
-                      {/* Center Image (Top) */}
-                      <motion.div
-                        initial={{ 
-                          opacity: 0,
-                          x: 0,
-                          y: 80,
-                          rotateZ: 0,
-                          scale: 0.3
-                        }}
-                        animate={{ 
-                          opacity: 1,
-                          x: 0,
-                          y: -40,
-                          rotateZ: 0,
-                          scale: 0.9
-                        }}
-                        exit={{
-                          opacity: 0,
-                          x: 0,
-                          y: 80,
-                          rotateZ: 0,
-                          scale: 0.3
-                        }}
-                        transition={{ 
-                          delay: 0,
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 18
-                        }}
-                        className="absolute w-48 h-40 rounded-2xl overflow-hidden shadow-2xl border-4 border-white"
-                        style={{ zIndex: 30 }}
-                      >
-                        <img 
-                          src={service.folderImages[1]} 
-                          alt="Project 2"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20" />
-                      </motion.div>
-
-                      {/* Right Image */}
-                      <motion.div
-                        initial={{ 
-                          opacity: 0,
-                          x: 0,
-                          y: 80,
-                          rotateZ: 0,
-                          scale: 0.3
-                        }}
-                        animate={{ 
-                          opacity: 1,
-                          x: 100,
-                          y: -20,
-                          rotateZ: 15,
-                          scale: 0.85
-                        }}
-                        exit={{
-                          opacity: 0,
-                          x: 0,
-                          y: 80,
-                          rotateZ: 0,
-                          scale: 0.3
-                        }}
-                        transition={{ 
-                          delay: 0.2,
-                          type: "spring",
-                          stiffness: 200,
-                          damping: 18
-                        }}
-                        className="absolute w-44 h-36 rounded-2xl overflow-hidden shadow-2xl border-4 border-white"
-                        style={{ zIndex: 25 }}
-                      >
-                        <img 
-                          src={service.folderImages[2]} 
-                          alt="Project 3"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20" />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-
-        {/* Card Footer with Blur Fade */}
-        <div className="p-8 bg-white">
-          <BlurFadeIn delay={0.6 + index * 0.2} duration={0.6} yOffset={15}>
-            <h3 className="text-2xl font-bold text-[#1F3F33] mb-3" style={{ fontFamily: "'Outfit', sans-serif" }}>{service.title}</h3>
-          </BlurFadeIn>
-          <BlurFadeIn delay={0.7 + index * 0.2} duration={0.6} yOffset={15}>
-            <p className="text-[#3E6B5C] leading-relaxed" style={{ fontFamily: "'Outfit', sans-serif" }}>{service.desc}</p>
-          </BlurFadeIn>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- INTERACTIVE 3D ICONS ---------------- */
-function InteractiveIcon({ icon, color }) {
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientY - rect.top - rect.height / 2) / 8;
-    const y = (e.clientX - rect.left - rect.width / 2) / 8;
-    setRotation({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setRotation({ x: 0, y: 0 });
-  };
+  const handleMouseLeave = useCallback(() => {
+    setHovered(false);
+    setTilt({ x: 0, y: 0 });
+    setSpotlight({ x: 50, y: 50 });
+  }, []);
 
   return (
     <motion.div
+      ref={cardRef}
       onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
       onMouseLeave={handleMouseLeave}
-      animate={{ rotateX: rotation.x, rotateY: rotation.y }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="relative w-40 h-40"
-      style={{ transformStyle: 'preserve-3d' }}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay: i * 0.12, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        transform: hovered
+          ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.03)`
+          : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)',
+        transition: hovered ? 'transform 0.1s ease-out' : 'transform 0.6s cubic-bezier(0.22,1,0.36,1)',
+        borderRadius: 28,
+        overflow: 'hidden',
+        background: '#F7F3EE',
+        border: hovered ? '1.5px solid rgba(94,176,131,0.4)' : '1.5px solid rgba(28,61,40,0.07)',
+        display: 'flex',
+        flexDirection: 'column',
+        cursor: 'default',
+        position: 'relative',
+        boxShadow: hovered
+          ? `0 30px 80px rgba(28,61,40,0.2), 0 0 0 1px rgba(94,176,131,0.2), inset 0 1px 0 rgba(255,255,255,0.6)`
+          : '0 2px 12px rgba(28,61,40,0.06)',
+        willChange: 'transform',
+      }}
     >
-      {icon === 'checklist' && <ChecklistIcon color={color} />}
-      {icon === 'tasks' && <TasksIcon color={color} />}
+      {/* Spotlight layer */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
+        borderRadius: 28, overflow: 'hidden',
+        opacity: hovered ? 1 : 0,
+        transition: 'opacity 0.4s ease',
+        background: `radial-gradient(circle 180px at ${spotlight.x}% ${spotlight.y}%, rgba(120,198,154,0.12) 0%, transparent 70%)`,
+      }} />
+
+      {/* Shimmer streak */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none',
+        borderRadius: 28, overflow: 'hidden',
+        opacity: hovered ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '-100%', left: '-60%',
+          width: '40%', height: '300%',
+          background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)',
+          animation: hovered ? 'shimmer-sweep 0.7s ease forwards' : 'none',
+        }} />
+      </div>
+
+      {/* Top accent bar */}
+      <div style={{
+        height: 3, width: '100%',
+        background: `linear-gradient(90deg, ${s.accent}, transparent)`,
+        opacity: hovered ? 1 : 0,
+        transition: 'opacity 0.3s ease',
+        position: 'relative', zIndex: 1,
+      }} />
+
+      {/* Media area */}
+      <div style={{
+        background: hovered ? `linear-gradient(135deg, #e8f5ee 0%, #EDE8E0 100%)` : '#EDE8E0',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '44px 32px 36px',
+        position: 'relative', minHeight: 220, overflow: 'hidden',
+        transition: 'background 0.5s ease',
+        zIndex: 1,
+      }}>
+        <span style={{
+          position: 'absolute', top: 16, right: 20,
+          fontWeight: 800, fontSize: '4rem',
+          color: hovered ? `rgba(28,61,40,0.12)` : 'rgba(28,61,40,0.06)',
+          letterSpacing: '-0.04em', lineHeight: 1,
+          transition: 'color 0.3s, transform 0.4s ease',
+          transform: hovered ? 'scale(1.1) translateY(-4px)' : 'scale(1)',
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+        }}>{s.label}</span>
+
+        <div style={{
+          position: 'absolute',
+          width: 180, height: 180, borderRadius: '50%',
+          border: `1px solid rgba(94,176,131,${hovered ? 0.25 : 0})`,
+          transition: 'all 0.5s ease',
+          transform: hovered ? 'scale(1.1)' : 'scale(0.8)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          width: 220, height: 220, borderRadius: '50%',
+          border: `1px solid rgba(94,176,131,${hovered ? 0.12 : 0})`,
+          transition: 'all 0.6s ease',
+          transform: hovered ? 'scale(1.1)' : 'scale(0.8)',
+        }} />
+
+        <div style={{
+          transform: hovered ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
+          transition: 'transform 0.5s cubic-bezier(0.22,1,0.36,1)',
+          position: 'relative', zIndex: 2,
+        }}>
+          <LottieCard src={s.src} />
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '28px 32px 36px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+        <span style={{
+          fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.2em',
+          textTransform: 'uppercase', color: s.color, marginBottom: 10,
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+        }}>Step {s.label}</span>
+
+        <h3 style={{
+          fontSize: '1.65rem', fontWeight: 800,
+          color: hovered ? s.accent : '#1c3d28',
+          margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1,
+          transition: 'color 0.3s ease',
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+        }}>{s.title}</h3>
+
+        <p style={{
+          fontSize: '0.88rem', color: '#5A7A68', lineHeight: 1.8, margin: 0, flex: 1,
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+          textAlign: 'justify',
+        }}>{s.desc}</p>
+
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: 24, gap: 16 }}>
+          <div style={{ height: 1, background: 'rgba(28,61,40,0.08)', flex: 1 }} />
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            border: hovered ? 'none' : '1.5px solid rgba(28,61,40,0.15)',
+            background: hovered ? '#1F3F33' : 'transparent',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.3s ease',
+            transform: hovered ? 'rotate(45deg)' : 'rotate(0deg)',
+            boxShadow: hovered ? `0 0 16px rgba(94,176,131,0.5)` : 'none',
+            flexShrink: 0,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round"
+              style={{ stroke: hovered ? '#F0EBE3' : '#1F3F33', transition: 'stroke 0.25s' }}>
+              <path d="M2 12L12 2M12 2H5M12 2v7" />
+            </svg>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 }
 
-/* ---------------- CHECKLIST ICON (GREEN) ---------------- */
-function ChecklistIcon({ color }) {
-  return (
-    <svg viewBox="0 0 140 140" fill="none" className="w-full h-full drop-shadow-2xl">
-      <motion.rect
-        x="20"
-        y="15"
-        width="100"
-        height="110"
-        rx="8"
-        fill="white"
-        stroke={color}
-        strokeWidth="4"
-        animate={{ y: [15, 12, 15] }}
-        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-      />
-      
-      {[0, 1, 2].map((i) => (
-        <g key={i}>
-          <motion.rect
-            x="35"
-            y={40 + i * 25}
-            width="18"
-            height="18"
-            rx="4"
-            fill={color}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: i * 0.2, type: "spring" }}
-          />
-          <motion.path
-            d={`M 38 ${49 + i * 25} L 43 ${54 + i * 25} L 50 ${47 + i * 25}`}
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ delay: 0.3 + i * 0.2, duration: 0.3 }}
-          />
-          <motion.line
-            x1="60"
-            y1={49 + i * 25}
-            x2="105"
-            y2={49 + i * 25}
-            stroke={color}
-            strokeWidth="3"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ delay: 0.4 + i * 0.2, duration: 0.4 }}
-          />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/* ---------------- TASKS ICON (GREEN) ---------------- */
-function TasksIcon({ color }) {
-  return (
-    <svg viewBox="0 0 140 140" fill="none" className="w-full h-full drop-shadow-2xl">
-      <motion.rect
-        x="15"
-        y="20"
-        width="110"
-        height="100"
-        rx="10"
-        fill="white"
-        stroke={color}
-        strokeWidth="4"
-      />
-      
-      {[0, 1, 2].map((i) => (
-        <g key={i}>
-          <motion.rect
-            x={25 + i * 35}
-            y="35"
-            width="25"
-            height="8"
-            rx="4"
-            fill={color}
-            opacity="0.3"
-          />
-          <motion.rect
-            x={25 + i * 35}
-            y="50"
-            width="25"
-            height="55"
-            rx="6"
-            fill={color}
-            initial={{ scaleY: 0, originY: 0 }}
-            animate={{ scaleY: 1 }}
-            transition={{ delay: i * 0.15, duration: 0.4, type: "spring" }}
-          />
-          {[0, 1].map((j) => (
-            <motion.rect
-              key={j}
-              x={28 + i * 35}
-              y={55 + j * 22}
-              width="19"
-              height="16"
-              rx="3"
-              fill="white"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.15 + j * 0.1 }}
-            />
-          ))}
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/* ---------------- CHECKLIST ANIMATION (HOVER STATE - GREEN) ---------------- */
-function ChecklistAnimation() {
-  return (
-    <div className="space-y-5">
-      {['Campaign Planning', 'Brand & media strategy', 'Market & audience analysis'].map((text, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
-          className="flex items-center gap-4"
-        >
-          <motion.div
-            className="w-7 h-7 rounded-lg bg-[#2D5F4D] flex items-center justify-center flex-shrink-0 shadow-lg"
-            whileHover={{ scale: 1.2, rotate: 360 }}
-            transition={{ type: "spring", stiffness: 400 }}
-          >
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <motion.path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={3} 
-                d="M5 13l4 4L19 7"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ delay: 0.3 + i * 0.1, duration: 0.3 }}
-              />
-            </svg>
-          </motion.div>
-          <span className="text-[#1F3F33] font-semibold text-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>{text}</span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-/* ---------------- TASKS ANIMATION (HOVER STATE - GREEN) ---------------- */
-function TasksAnimation() {
-  const tasks = [
-    { name: 'Landing Page', status: 'To Do', color: '#3B82F6' },
-    { name: 'Mobile App UI', status: 'In Progress', color: '#F59E0B' },
-    { name: 'Brand Guideline', status: 'Review', color: '#EC4899' }
-  ];
+export default function About() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <div className="space-y-4 w-full max-w-sm">
-      {tasks.map((task, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20, rotateX: -15 }}
-          animate={{ opacity: 1, y: 0, rotateX: 0 }}
-          transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
-          whileHover={{ scale: 1.05, rotateY: 5 }}
-          className="bg-white p-5 rounded-2xl shadow-xl border-2 border-gray-100"
-          style={{ transformStyle: 'preserve-3d' }}
-        >
-          <h4 className="font-bold text-[#1F3F33] mb-3 text-lg" style={{ fontFamily: "'Outfit', sans-serif" }}>{task.name}</h4>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-2 text-gray-500 text-sm" style={{ fontFamily: "'Outfit', sans-serif" }}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              January {15 - i * 5}
-            </span>
-            <motion.span 
-              className="px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ 
-                fontFamily: "'Outfit', sans-serif",
-                backgroundColor: `${task.color}20`,
-                color: task.color 
-              }}
-              whileHover={{ scale: 1.1 }}
-            >
-              {task.status}
-            </motion.span>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&family=DM+Serif+Display:ital@0;1&display=swap');
+
+        @keyframes shimmer-sweep {
+          0%   { left: -60%; opacity: 0; }
+          10%  { opacity: 1; }
+          100% { left: 120%; opacity: 0; }
+        }
+
+        #about-v2 {
+          background: #F0EBE3;
+          padding: 110px 48px 120px;
+          font-family: 'Bricolage Grotesque', sans-serif;
+          position: relative;
+          overflow: hidden;
+        }
+        #about-v2::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(circle, rgba(31,63,51,0.06) 1px, transparent 1px);
+          background-size: 32px 32px;
+          pointer-events: none;
+        }
+        .ab2-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 2;
+        }
+        .ab2-top {
+          display: flex; flex-direction: column;
+          align-items: center; text-align: center;
+          gap: 24px; margin-bottom: 80px;
+        }
+        .ab2-eyebrow {
+          display: inline-block; font-size: 0.72rem; font-weight: 600;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          color: #5eb083; margin-bottom: 20px;
+        }
+        .ab2-heading {
+          font-family: 'Bricolage Grotesque', sans-serif;
+          font-weight: 800; font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+          line-height: 1.05; letter-spacing: -0.04em; color: #1F3F33; margin: 0;
+        }
+        .ab2-heading em {
+          font-family: 'DM Serif Display', serif; font-style: italic;
+          font-weight: 400; color: #47876F; letter-spacing: -0.05em;
+        }
+        .ab2-sub {
+          font-size: 0.9rem; color: #6A6456; max-width: 420px;
+          line-height: 1.75; margin: 0; text-align: center;
+        }
+        .ab2-grid {
+          display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+        }
+
+        /* ── STRIP ── */
+        .ab2-strip {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-top: 48px; padding: 28px 40px;
+          background: #1F3F33; border-radius: 20px; gap: 24px;
+        }
+        .ab2-strip-text {
+          font-weight: 800; font-size: clamp(1.1rem, 2vw, 1.5rem);
+          color: rgba(240,235,227,0.9); letter-spacing: -0.03em; line-height: 1.2;
+          flex-shrink: 0;
+        }
+        .ab2-strip-text em {
+          font-family: 'DM Serif Display', serif; font-style: italic;
+          font-weight: 400; color: #78c69a;
+        }
+        .ab2-strip-pills {
+          display: flex; gap: 10px; flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+        .ab2-pill {
+          background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 100px; padding: 7px 18px;
+          font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+          color: rgba(240,235,227,0.7); white-space: nowrap;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 900px) {
+          #about-v2 { padding: 72px 20px 80px; }
+          .ab2-top { margin-bottom: 48px; }
+          .ab2-sub { max-width: 100%; }
+          .ab2-grid { grid-template-columns: 1fr; gap: 14px; }
+          .ab2-strip {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 24px 24px;
+            gap: 20px;
+          }
+          .ab2-strip-text { font-size: clamp(1rem, 4.5vw, 1.2rem); }
+          .ab2-strip-pills { justify-content: flex-start; gap: 8px; }
+          .ab2-pill { padding: 6px 14px; font-size: 0.68rem; }
+        }
+      `}</style>
+
+      <section id="about-v2" ref={ref}>
+        <div className="ab2-inner">
+
+          {/* ── HEADER with BlurFadeIn ── */}
+          <div className="ab2-top">
+            <BlurFadeIn delay={0.1} yOffset={20}>
+              <span className="ab2-eyebrow">How We Work</span>
+            </BlurFadeIn>
+            <BlurFadeIn delay={0.25} yOffset={30}>
+              <h2 className="ab2-heading">
+                How we can<br />
+                help you <em>grooow</em>
+              </h2>
+            </BlurFadeIn>
+            <BlurFadeIn delay={0.4} yOffset={20}>
+              <p className="ab2-sub">
+                Three pillars that drive everything we do — from the first brief to the final delivery.
+              </p>
+            </BlurFadeIn>
           </div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
 
-/* ---------------- GREEN FOLDER ICON WITH OPEN STATE ---------------- */
-function GreenFolderIcon({ isOpen }) {
-  return (
-    <motion.svg
-      viewBox="0 0 240 200"
-      fill="none"
-      className="w-56 h-56 drop-shadow-2xl"
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: "spring", stiffness: 400, damping: 15 }}
-    >
-      {/* Folder Back Tab */}
-      <motion.path
-        d="M 40 55 L 100 55 L 115 70 L 200 70 L 200 50 L 40 50 Z"
-        fill="#47876F"
-        opacity="0.6"
-        animate={isOpen ? {
-          d: "M 40 50 L 100 50 L 115 65 L 205 65 L 210 45 L 40 45 Z"
-        } : {}}
-        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      />
-      
-      {/* Main Folder Body */}
-      <motion.rect
-        x="30"
-        y="70"
-        width="180"
-        height="110"
-        rx="14"
-        fill="#2D5F4D"
-        animate={isOpen ? {
-          y: 75,
-          height: 105
-        } : { 
-          y: [70, 68, 70],
-        }}
-        transition={isOpen ? 
-          { type: "spring", stiffness: 200, damping: 20 } :
-          { repeat: Infinity, duration: 2.5, ease: "easeInOut" }
-        }
-      />
-      
-      {/* Folder Front Face with Border */}
-      <motion.path
-        d="M 35 75 L 205 75 L 205 172 Q 205 178 199 178 L 41 178 Q 35 178 35 172 Z"
-        fill="#2D5F4D"
-        stroke="rgba(0,0,0,0.1)"
-        strokeWidth="2"
-        animate={isOpen ? {
-          d: "M 35 80 L 205 80 L 205 175 Q 205 180 199 180 L 41 180 Q 35 180 35 175 Z"
-        } : {}}
-        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      />
-      
-      {/* Folder Top Edge Highlight */}
-      <motion.rect
-        x="35"
-        y="75"
-        width="170"
-        height="6"
-        fill="rgba(255,255,255,0.15)"
-        animate={isOpen ? { y: 80 } : {}}
-        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      />
-      
-      {/* Folder Tab */}
-      <motion.path
-        d="M 40 70 L 100 70 L 112 80 L 112 75 L 40 75 Z"
-        fill="#47876F"
-        opacity="0.8"
-        animate={isOpen ? {
-          d: "M 40 65 L 100 65 L 112 75 L 112 70 L 40 70 Z"
-        } : {}}
-        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      />
-      
-      {/* Shine Effect */}
-      <motion.ellipse
-        cx="80"
-        cy="120"
-        rx="30"
-        ry="50"
-        fill="white"
-        opacity="0.1"
-        animate={isOpen ? {
-          opacity: [0.1, 0.15, 0.1]
-        } : { 
-          cx: [80, 160, 80],
-          opacity: [0.1, 0.2, 0.1]
-        }}
-        transition={isOpen ?
-          { repeat: Infinity, duration: 2, ease: "easeInOut" } :
-          { repeat: Infinity, duration: 4, ease: "easeInOut" }
-        }
-      />
-      
-      {/* Shadow at Bottom */}
-      <motion.ellipse
-        cx="120"
-        cy="185"
-        rx="80"
-        ry="8"
-        fill="rgba(0,0,0,0.1)"
-        animate={isOpen ? { 
-          ry: 12,
-          opacity: 0.15 
-        } : {
-          opacity: 0.1
-        }}
-        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      />
-    </motion.svg>
+          {/* ── CARDS — keep existing MagneticCard motion ── */}
+          <div className="ab2-grid">
+            {services.map((s, i) => (
+              <MagneticCard key={i} s={s} i={i} isInView={isInView} />
+            ))}
+          </div>
+
+          {/* ── STRIP with BlurFadeIn ── */}
+          <BlurFadeIn delay={0.5} yOffset={24}>
+            <div className="ab2-strip">
+              <p className="ab2-strip-text">
+                Every great brand starts with<br />
+                a <em>clear strategy</em> and a <em>bold vision.</em>
+              </p>
+              <div className="ab2-strip-pills">
+                {['Brand Audit', 'Market Research', 'Campaign Planning', 'Creative Direction', 'Growth Analytics'].map(pill => (
+                  <span key={pill} className="ab2-pill">{pill}</span>
+                ))}
+              </div>
+            </div>
+          </BlurFadeIn>
+
+        </div>
+      </section>
+    </>
   );
 }

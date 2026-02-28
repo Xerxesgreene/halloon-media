@@ -5,27 +5,14 @@ import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 
 /**
- * BlurFadeIn - A reliable blur + fade animation component
- * 
- * Usage:
- * <BlurFadeIn>
- *   <h1>Your content here</h1>
- * </BlurFadeIn>
- * 
- * Props:
- * - delay: Animation delay in seconds (default: 0)
- * - duration: Animation duration in seconds (default: 0.6)
- * - blur: Blur amount in pixels (default: 10)
- * - yOffset: Vertical offset in pixels (default: 20)
- * - threshold: Intersection threshold 0-1 (default: 0.1)
- * - once: Animate only once (default: true)
+ * BlurFadeIn - Smooth pop-up fade animation (no blur)
+ * All props preserved for backwards compatibility.
  */
-
 export default function BlurFadeIn({
   children,
   delay = 0,
   duration = 0.6,
-  blur = 10,
+  blur = 0,        // kept in signature but ignored
   yOffset = 20,
   threshold = 0.1,
   once = true,
@@ -42,26 +29,18 @@ export default function BlurFadeIn({
       ref={ref}
       initial={{
         opacity: 0,
-        filter: `blur(${blur}px)`,
         y: yOffset,
+        scale: 0.97,
       }}
       animate={
         isInView
-          ? {
-              opacity: 1,
-              filter: 'blur(0px)',
-              y: 0,
-            }
-          : {
-              opacity: 0,
-              filter: `blur(${blur}px)`,
-              y: yOffset,
-            }
+          ? { opacity: 1, y: 0, scale: 1 }
+          : { opacity: 0, y: yOffset, scale: 0.97 }
       }
       transition={{
         duration,
         delay,
-        ease: [0.25, 0.4, 0.25, 1],
+        ease: [0.22, 1, 0.36, 1],
       }}
       className={className}
     >
@@ -71,20 +50,9 @@ export default function BlurFadeIn({
 }
 
 /**
- * BlurFadeText - Character-by-character blur fade animation
- * 
- * Usage:
- * <BlurFadeText text="Hello World" />
- * 
- * Props:
- * - text: The text to animate
- * - delay: Base delay before animation starts (default: 0)
- * - charDelay: Delay between each character (default: 0.03)
- * - duration: Duration for each character (default: 0.4)
- * - className: CSS classes for the container
- * - style: Inline styles for the container (including fontFamily)
+ * BlurFadeText - Character-by-character pop-up animation
+ * All props preserved for backwards compatibility.
  */
-
 export function BlurFadeText({
   text = '',
   delay = 0,
@@ -108,25 +76,16 @@ export function BlurFadeText({
       {chars.map((char, index) => (
         <motion.span
           key={`${char}-${index}`}
-          initial={{
-            opacity: 0,
-            filter: 'blur(8px)',
-          }}
+          initial={{ opacity: 0, y: 8, scale: 0.95 }}
           animate={
             isInView
-              ? {
-                  opacity: 1,
-                  filter: 'blur(0px)',
-                }
-              : {
-                  opacity: 0,
-                  filter: 'blur(8px)',
-                }
+              ? { opacity: 1, y: 0, scale: 1 }
+              : { opacity: 0, y: 8, scale: 0.95 }
           }
           transition={{
             duration,
             delay: delay + index * charDelay,
-            ease: [0.25, 0.4, 0.25, 1],
+            ease: [0.22, 1, 0.36, 1],
           }}
           style={{
             display: 'inline-block',
@@ -141,21 +100,14 @@ export function BlurFadeText({
 }
 
 /**
- * BlurFadeStagger - Stagger animation for multiple children
- * 
- * Usage:
- * <BlurFadeStagger staggerDelay={0.1}>
- *   <div>Item 1</div>
- *   <div>Item 2</div>
- *   <div>Item 3</div>
- * </BlurFadeStagger>
+ * BlurFadeStagger - Stagger pop-up animation for multiple children
+ * All props preserved for backwards compatibility.
  */
-
 export function BlurFadeStagger({
   children,
   staggerDelay = 0.1,
   duration = 0.6,
-  blur = 10,
+  blur = 0,        // kept in signature but ignored
   yOffset = 20,
   className = '',
 }) {
@@ -172,28 +124,16 @@ export function BlurFadeStagger({
       {childrenArray.map((child, index) => (
         <motion.div
           key={index}
-          initial={{
-            opacity: 0,
-            filter: `blur(${blur}px)`,
-            y: yOffset,
-          }}
+          initial={{ opacity: 0, y: yOffset, scale: 0.97 }}
           animate={
             isInView
-              ? {
-                  opacity: 1,
-                  filter: 'blur(0px)',
-                  y: 0,
-                }
-              : {
-                  opacity: 0,
-                  filter: `blur(${blur}px)`,
-                  y: yOffset,
-                }
+              ? { opacity: 1, y: 0, scale: 1 }
+              : { opacity: 0, y: yOffset, scale: 0.97 }
           }
           transition={{
             duration,
             delay: index * staggerDelay,
-            ease: [0.25, 0.4, 0.25, 1],
+            ease: [0.22, 1, 0.36, 1],
           }}
         >
           {child}
