@@ -27,7 +27,7 @@ const POINTS = [
   { icon: '🌍', label: 'Regional expertise — UAE, KSA, Qatar, Kuwait, India projects' },
   { icon: '👥', label: 'Dynamic team of 40+ skilled professionals' },
   { icon: '📅', label: '8+ years of expertise in media & brand consultancy' },
-  { icon: '🏆', label: '50+ brands served across multiple industries' },
+  { icon: '🏆', label: '35+ brands served across multiple industries' },
 ];
 
 export default function WhyChooseUs() {

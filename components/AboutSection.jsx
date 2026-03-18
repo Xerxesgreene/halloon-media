@@ -8,7 +8,7 @@ const STATS = [
   { value: 8,  suffix: '+', label: 'Years of expertise' },
   { value: 40, suffix: '+', label: 'In-house experts' },
   { value: 5,  suffix: '',  label: 'Regional markets' },
-  { value: 50, suffix: '+', label: 'Brands served' },
+  { value: 35, suffix: '+', label: 'Brands served' },
 ];
 
 function Counter({ value, suffix }) {
@@ -310,7 +310,7 @@ export default function AboutSection() {
           </BlurFadeIn>
           <BlurFadeIn delay={0.3} yOffset={16}>
             <p className="ab-subheading">
-              A 360° media consultancy bridging the Middle East and South Asia — local expertise, global standards.
+              A 360° media consultancy bridging the Middle East and South Asia local expertise, global standards.
             </p>
           </BlurFadeIn>
         </div>
@@ -336,10 +336,10 @@ export default function AboutSection() {
           <BlurFadeIn delay={0.15} yOffset={20}>
             <div className="ab-body-left">
               <p>
-                <strong>Halloon Media</strong> is a leading media consultancy with a strong presence across the Middle East and South Asia — bringing local expertise with global standards to every project we take on.
+                <strong>Halloon Media</strong> is a leading media consultancy with a strong presence across the Middle East and South Asia bringing local expertise with global standards to every project we take on.
               </p>
               <p>
-                We specialise in transforming brands through innovative media strategies, creative campaigns, and digital excellence across Dubai, KSA, Qatar, Kuwait, and India.
+                We specialise in transforming brands through innovative media strategies, creative campaigns, and digital excellence across UAE, KSA, Qatar, Kuwait, and India.
               </p>
             </div>
           </BlurFadeIn>

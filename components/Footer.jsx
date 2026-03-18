@@ -1,6 +1,6 @@
 'use client';
 
-import { Instagram, Youtube, MessageCircle } from 'lucide-react';
+import { Instagram, Youtube, MessageCircle, Linkedin } from 'lucide-react';
 import Image from 'next/image';
 
 function smoothScrollTo(href) {
@@ -72,20 +72,25 @@ export default function Footer() {
                 }}>Menu</h4>
                 <ul className="space-y-3" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '0.88rem', fontWeight: 400 }}>
                   <li>
+                    <button onClick={() => smoothScrollTo('#about-section')} className="hover:text-white transition-colors bg-transparent border-none cursor-pointer" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                      About
+                    </button>
+                  </li>
+                  <li>
                     <button onClick={() => smoothScrollTo('#services')} className="hover:text-white transition-colors bg-transparent border-none cursor-pointer" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       Services
                     </button>
                   </li>
-                  <li>
+                  {/* <li>
                     <button onClick={() => smoothScrollTo('#testimonials')} className="hover:text-white transition-colors bg-transparent border-none cursor-pointer" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       Clients
                     </button>
-                  </li>
-                  <li>
+                  </li> */}
+                  {/* <li>
                     <button onClick={() => smoothScrollTo('#works')} className="hover:text-white transition-colors bg-transparent border-none cursor-pointer" style={{ color: 'rgba(255,255,255,0.45)' }}>
                       Works
                     </button>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
 
@@ -108,7 +113,7 @@ export default function Footer() {
                 </ul>
               </div>
 
-              {/* CONTACT — icons only */}
+              {/* CONTACT — icons */}
               <div className="space-y-5">
                 <h4 style={{
                   fontFamily: "'Bricolage Grotesque', sans-serif",
@@ -119,14 +124,41 @@ export default function Footer() {
                   color: '#fff',
                 }}>Contact</h4>
                 <div className="flex gap-4 pt-1" style={{ color: '#78c69a' }}>
-                  <a href="#" className="hover:text-white transition-colors" aria-label="YouTube">
+                  <a
+                    href="https://www.youtube.com/@HalloonMediaConsultancy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                    aria-label="YouTube"
+                  >
                     <Youtube className="w-5 h-5" />
                   </a>
-                  <a href="https://wa.me/971568056934" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" aria-label="WhatsApp">
+                  <a
+                    href="https://wa.me/971568056934"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                    aria-label="WhatsApp"
+                  >
                     <MessageCircle className="w-5 h-5" fill="currentColor" />
                   </a>
-                  <a href="#" className="hover:text-white transition-colors" aria-label="Instagram">
+                  <a
+                    href="https://www.instagram.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                    aria-label="Instagram"
+                  >
                     <Instagram className="w-5 h-5" />
+                  </a>
+                  <a
+                    href="https://linkedin.com/company/halloon-media"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                    aria-label="LinkedIn"
+                  >
+                    <Linkedin className="w-5 h-5" />
                   </a>
                 </div>
               </div>
@@ -155,7 +187,7 @@ export default function Footer() {
                 >
                   Halloon
                 </h1>
-                <span className="absolute top-[15%] -right-[5%] text-[2vw] text-white/20 font-light">©</span>
+                <span className="absolute top-[15%] -right-[5%] text-[2vw] text-white/20 font-light"></span>
               </div>
             </div>
             <div style={{
@@ -167,7 +199,7 @@ export default function Footer() {
               color: 'rgba(255,255,255,0.25)',
               textAlign: 'center',
             }}>
-              © {new Date().getFullYear()} Halloon Media Consultancy. All rights reserved.
+               {new Date().getFullYear()} Halloon Media Consultancy. All rights reserved.
             </div>
           </div>
 

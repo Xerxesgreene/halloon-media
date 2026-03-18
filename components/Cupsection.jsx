@@ -7,20 +7,21 @@ import {
   useTransform,
 } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import { gsap } from 'gsap';
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #F0EBE3;
+    
     font-family: 'Bricolage Grotesque', sans-serif;
   }
 
   /* ── DESKTOP ── */
   .hero-wrapper {
-    padding: 28px;
+  background: #F0EBE3;
+    /* FIX: remove top padding so no gap between Hero and HeroSection */
+    padding: 0 28px 28px 28px;
   }
 
   .hero {
@@ -33,6 +34,7 @@ const styles = `
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
+    justify-items: center;
     padding: 60px 7vw;
   }
 
@@ -41,6 +43,7 @@ const styles = `
     flex-direction: column;
     position: relative;
     z-index: 2;
+    justify-self: start;
   }
 
   .line1, .line2, .line3 {
@@ -70,10 +73,13 @@ const styles = `
 
   .hero-cup {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     position: relative;
     z-index: 2;
+    justify-self: end;
+    align-self: center;
+    padding-right: 4vw;
   }
 
   @keyframes floatCup {
@@ -87,7 +93,7 @@ const styles = `
   }
 
   .cup-wrap img {
-    width: clamp(700px, 80vw, 1200px);
+    width: clamp(150px, 18vw, 260px);
     height: auto;
     display: block;
   }
@@ -109,6 +115,12 @@ const styles = `
   .blob-2 {
     background: radial-gradient(circle, #4ADE80 0%, transparent 70%);
     bottom: -250px; right: -200px;
+    animation: blobFloat 22s ease-in-out infinite;
+  }
+
+  @keyframes blobFloat {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(40px); }
   }
 
   .mouse-light {
@@ -125,7 +137,7 @@ const styles = `
   .grain {
     position: absolute;
     inset: 0;
-    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    background-image: url("/images/noise.svg");
     opacity: 0.05;
     mix-blend-mode: overlay;
     pointer-events: none;
@@ -134,7 +146,7 @@ const styles = `
 
   @media (max-width: 768px) {
     .hero-wrapper {
-      padding: 16px 16px 24px 16px;
+      padding: 0 16px 24px 16px;
       position: relative;
       z-index: 20;
     }
@@ -147,21 +159,24 @@ const styles = `
       border-radius: 24px;
       min-height: unset;
       padding: 48px 28px 52px;
-      text-align: center;
+      text-align: left;
       gap: 32px;
     }
 
-    .hero-text { align-items: center; }
+    .hero-text { align-items: flex-start; }
 
     .line1, .line2, .line3 {
-      font-size: clamp(1.8rem, 7vw, 2.4rem);
+      font-size: clamp(1.75rem, 7.2vw, 2.2rem);
       white-space: normal;
+      text-align: left;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
     }
 
     .hero-tagline {
-      text-align: center;
+      text-align: left;
       max-width: 100%;
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       margin-top: 20px;
     }
 
@@ -176,7 +191,7 @@ const styles = `
     }
 
     .cup-wrap img {
-      width: min(80vw, 340px);
+      width: min(42vw, 170px);
       max-width: 100%;
       height: auto;
       margin: 0 auto;
@@ -187,7 +202,10 @@ const styles = `
 
     .blob { width: 300px; height: 300px; }
     .blob-1 { top: -100px; left: -100px; }
-    .blob-2 { bottom: -100px; right: -80px; }
+    .blob-2 {
+      bottom: -100px; right: -80px;
+      animation: none;
+    }
   }
 `;
 
@@ -198,12 +216,12 @@ export default function HeroSection() {
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768);
     check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    let t;
+    const debounced = () => { clearTimeout(t); t = setTimeout(check, 150); };
+    window.addEventListener('resize', debounced);
+    return () => { window.removeEventListener('resize', debounced); clearTimeout(t); };
   }, []);
 
-  // ✅ Manual scroll progress synced to ScrollSmoother's virtual scroll
-  // instead of Framer Motion's useScroll (which reads native scroll position)
   const rawProgress = useMotionValue(0);
 
   useEffect(() => {
@@ -213,7 +231,6 @@ export default function HeroSection() {
       const el = heroRef.current;
       if (!el) return;
 
-      // Use ScrollSmoother's scroll position if available, else fall back
       const scrollY = window.__smoother
         ? window.__smoother.scrollTop()
         : window.scrollY;
@@ -223,20 +240,12 @@ export default function HeroSection() {
       const elHeight = rect.height;
       const viewH = window.innerHeight;
 
-      // Progress: 0 when section enters bottom, 1 when it exits top
       const progress = (scrollY - elTop + viewH) / (elHeight + viewH);
       rawProgress.set(Math.min(1, Math.max(0, progress)));
     };
 
-    // Tick on every frame to stay in sync with GSAP's virtual scroll
-    let rafId;
-    const tick = () => {
-      update();
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-
-    return () => cancelAnimationFrame(rafId);
+    gsap.ticker.add(update);
+    return () => gsap.ticker.remove(update);
   }, [isMobile, rawProgress]);
 
   const cupY  = useTransform(rawProgress, [0, 1], [0, -80]);
@@ -264,12 +273,9 @@ export default function HeroSection() {
           ref={heroRef}
           onMouseMove={handleMouseMove}
         >
-          <motion.div className="blob blob-1" style={{ y: blobY }} />
-          <motion.div
-            className="blob blob-2"
-            animate={{ y: [0, 40, 0] }}
-            transition={{ duration: 22, repeat: Infinity }}
-          />
+          <motion.div className="blob blob-1" style={isMobile ? {} : { y: blobY }} />
+          <div className="blob blob-2" />
+
           {!isMobile && (
             <motion.div
               className="mouse-light"

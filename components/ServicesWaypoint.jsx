@@ -227,18 +227,6 @@ function ServiceCard({ service, index }) {
               />
               <div className="absolute inset-0" style={{ background: `linear-gradient(145deg, ${service.color}BB, #00000070)`, opacity: hovered ? 0.75 : 0.6, transition: 'opacity 0.5s ease' }} />
               <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)', opacity: hovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
-              <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-between text-white">
-                <div className="mt-auto">
-                  <h4 className="font-bold text-2xl text-white" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", transform: hovered ? 'translateY(-4px)' : 'translateY(0)', transition: 'transform 0.4s ease' }}>
-                    {service.title}
-                  </h4>
-                  <div className="overflow-hidden" style={{ maxHeight: hovered ? '80px' : '0', transition: 'max-height 0.45s ease' }}>
-                    <p className="mt-2 text-base" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", color: 'rgba(255,255,255,0.9)', opacity: hovered ? 1 : 0, transition: 'opacity 0.4s ease' }}>
-                      {service.tagline}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </motion.div>
         </div>

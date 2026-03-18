@@ -13,22 +13,23 @@ export default function SmoothScroller({ children }) {
   useEffect(() => {
     if (smootherRef.current) return;
 
-    // ✅ Wait for the intro loader to finish (3000ms) before initializing.
-    // If ScrollSmoother inits while content is opacity:0, it miscalculates
-    // page height and scroll positions.
+    // Normalize scroll here (client-only, after GSAP is ready)
+    ScrollTrigger.normalizeScroll(true);
+
     const initTimer = setTimeout(() => {
       smootherRef.current = ScrollSmoother.create({
         wrapper: '#smooth-wrapper',
         content: '#smooth-content',
-        smooth: 1.5,
-        effects: true,
-        smoothTouch: 0.1,
-        // ✅ normalizeScroll removed — it conflicts with fixed/portal elements
-        // and causes layout thrashing during the loader phase
+        smooth: 0.8,
+        effects: false,
+        smoothTouch: 0,       // ← use 0 (number) not false — more reliable
+        ignoreMobileResize: true, // ← prevents ScrollTrigger refresh on mobile keyboard open
       });
 
+      ScrollTrigger.refresh();
+
       window.__smoother = smootherRef.current;
-    }, 3100); // just after loader's onComplete fires at 3000ms
+    }, 3100);
 
     return () => {
       clearTimeout(initTimer);
@@ -39,13 +40,11 @@ export default function SmoothScroller({ children }) {
   }, []);
 
   return (
-    /*
-      ✅ overflow:hidden stays — GSAP needs it for scroll containment.
-      The IntroLoader escapes this via createPortal() in page.jsx,
-      so it's no longer affected by this overflow.
-    */
-    <div id="smooth-wrapper" style={{ overflow: 'hidden', height: '100vh', width: '100%' }}>
-      <div id="smooth-content">
+    <div
+      id="smooth-wrapper"
+      style={{ overflow: 'hidden', height: '100vh', width: '100%', position: 'fixed', top: 0, left: 0, zIndex: 1 }}
+    >
+      <div id="smooth-content" style={{ willChange: 'transform', overflowX: 'hidden' }}>
         {children}
       </div>
     </div>

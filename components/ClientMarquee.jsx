@@ -5,11 +5,11 @@ import { useRef, useEffect, useState } from 'react';
 import { BlurFadeText } from './BlurFadeIn';
 
 const LOGOS = [
-  { type: 'text', value: 'Amsterdam', className: 'font-medium' },
-  { type: 'text', value: 'venice.', className: 'font-serif italic' },
-  { type: 'text', value: 'thes', className: 'font-medium' },
+  { type: 'text', value: 'Amsterdam',  className: 'font-medium' },
+  { type: 'text', value: 'venice.',    className: 'font-serif italic' },
+  { type: 'text', value: 'thes',       className: 'font-medium' },
   { type: 'dots' },
-  { type: 'text', value: 'MILANO', className: 'tracking-[0.35em] text-sm font-semibold' },
+  { type: 'text', value: 'MILANO',     className: 'tracking-[0.35em] text-sm font-semibold' },
 ];
 
 function LogoItem({ logo }) {
@@ -24,7 +24,8 @@ function LogoItem({ logo }) {
   return (
     <span
       className={`${logo.className} whitespace-nowrap text-2xl`}
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
+      // ✅ Match other sections — Bricolage Grotesque for all marquee items
+      style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
     >
       {logo.value}
     </span>
@@ -36,14 +37,25 @@ export default function ClientMarquee() {
   const trackRef = useRef(null);
   const [trackWidth, setTrackWidth] = useState(0);
 
+  // FIX: recalculate trackWidth on resize too, not just mount
   useEffect(() => {
-    if (!trackRef.current) return;
-    setTrackWidth(trackRef.current.scrollWidth / 3);
+    const measure = () => {
+      if (!trackRef.current) return;
+      setTrackWidth(trackRef.current.scrollWidth / 3);
+    };
+    measure();
+    let t;
+    const debounced = () => { clearTimeout(t); t = setTimeout(measure, 150); };
+    window.addEventListener('resize', debounced);
+    return () => { window.removeEventListener('resize', debounced); clearTimeout(t); };
   }, []);
 
+  // FIX: normalize speed by time not delta — consistent across 60Hz and 120Hz
+  // 80px per second regardless of refresh rate
+  const SPEED = 80; // px per second
   useAnimationFrame((_, delta) => {
     if (!trackWidth) return;
-    let currentX = x.get() - 0.08 * delta;
+    let currentX = x.get() - (SPEED * delta) / 1000;
     if (Math.abs(currentX) >= trackWidth) currentX = currentX % trackWidth;
     x.set(currentX);
   });
@@ -53,17 +65,18 @@ export default function ClientMarquee() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap');
+        /* FIX: @import removed — fonts loaded once in globals.css */
 
-        .marquee-heading,
-        .marquee-heading span,
-        .marquee-heading [class*="blur"],
-        .marquee-heading * {
-          font-family: 'Bricolage Grotesque', sans-serif !important;
+        /* ✅ heading uses Bricolage Grotesque to match Hero + HeroSection */
+        .marquee-heading h2 {
+          font-family: 'Bricolage Grotesque', sans-serif;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+          font-size: 13px;
+          text-transform: uppercase;
+          color: rgba(28, 61, 40, 0.5);
         }
 
-        /* ✅ The gap cover strip — sits above everything at the very top of
-           this section, same cream color, hides any browser sub-pixel line */
         #marquee-section::before {
           content: '';
           position: absolute;
@@ -82,17 +95,20 @@ export default function ClientMarquee() {
         className="relative py-32 overflow-hidden"
         style={{
           background: bg,
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Bricolage Grotesque', sans-serif",
           position: 'relative',
         }}
       >
+        <style>{`
+          @media (max-width: 768px) {
+            #marquee-section { padding-top: 3.5rem !important; padding-bottom: 3.5rem !important; }
+            #marquee-section .mb-20 { margin-bottom: 2.5rem !important; }
+          }
+        `}</style>
         <div className="relative max-w-7xl mx-auto px-4">
 
           <div className="mb-20 text-center">
-            <div
-              className="marquee-heading"
-              style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-            >
+            <div className="marquee-heading">
               <BlurFadeText
                 text="OUR TRUSTED CLIENTS"
                 as="h2"

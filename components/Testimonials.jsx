@@ -782,7 +782,7 @@ export default function Testimonials() {
             <BlurFadeIn delay={0.35} duration={0.8}>
               <div className="t-stats-bar">
                 {[
-                  { value: '50+', label: 'Happy Clients' },
+                  { value: '35+', label: 'Happy Clients' },
                   { value: '95%', label: 'Satisfaction Rate' },
                   { value: '60+', label: 'Projects Delivered' },
                 ].map((s, i) => (

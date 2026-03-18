@@ -2,14 +2,17 @@
 
 import { ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const WORDS = [
-  { text: 'things',  color: '#9b8ea0' },
-  { text: 'brands',  color: '#7ec8b0' },
-  { text: 'ideas',   color: '#e07b5a' },
-  { text: 'stories', color: '#6fa3d0' },
-  { text: 'moments', color: '#c4a65a' },
+  { text: 'brands',      color: '#7ec8b0' },
+  { text: 'journeys',    color: '#6fa3d0' },
+  { text: 'stories',     color: '#c4a65a' },
+  { text: 'experiences', color: '#e07b5a' },
+  { text: 'designs',     color: '#9b8ea0' },
+  { text: 'ideas',       color: '#d4836a' },
+  { text: 'moments',     color: '#7ab89a' },
+  { text: 'campaigns',   color: '#a07ec8' },
 ];
 
 function smoothScrollTo(href) {
@@ -22,24 +25,22 @@ function smoothScrollTo(href) {
 
 export default function Hero({ introDone }) {
   const [wordIndex, setWordIndex] = useState(0);
-  const [maskDataUrl, setMaskDataUrl] = useState(null);
+  const [maskUrl, setMaskUrl] = useState(null);
 
   useEffect(() => {
+    if (!introDone) return;
     const id = setInterval(() => setWordIndex(i => (i + 1) % WORDS.length), 2200);
     return () => clearInterval(id);
-  }, []);
+  }, [introDone]);
 
   useEffect(() => {
-    const fontUrl = 'url(https://fonts.gstatic.com/s/bricolagegrotesque/v9/3y9U6as8bTXq_nANBjzKo3IeZx8z6up5HsSoRHTBRXyC.woff2)';
-    const font = new FontFace('BricolageHero', fontUrl, { weight: '800' });
-
     const render = () => {
       const vw = window.innerWidth;
       const mobile = vw <= 768;
       const dpr = window.devicePixelRatio || 1;
 
-      const targetFill  = mobile ? 0.88 : 0.65;
-      const heightRatio = mobile ? 0.36 : 0.22;
+      const targetFill  = mobile ? 0.95 : 0.88;
+      const heightRatio = mobile ? 0.40 : 0.28;
 
       const W = Math.round(vw * dpr);
       const H = Math.round(W * heightRatio);
@@ -67,22 +68,39 @@ export default function Hero({ introDone }) {
       ctx.textBaseline = 'middle';
       ctx.fillText('Halloon', W / 2, H / 2);
 
-      setMaskDataUrl(canvas.toDataURL('image/png'));
+      canvas.toBlob(blob => {
+        const newUrl = URL.createObjectURL(blob);
+        setMaskUrl(prev => {
+          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+          return newUrl;
+        });
+      }, 'image/png');
     };
 
-    font.load()
-      .then(loaded => { document.fonts.add(loaded); render(); })
-      .catch(() => render());
+    document.fonts.ready.then(() => render());
 
-    window.addEventListener('resize', render);
-    return () => window.removeEventListener('resize', render);
+    let resizeTimer;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(render, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
+      setMaskUrl(prev => {
+        if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+        return null;
+      });
+    };
   }, []);
 
   const current = WORDS[wordIndex];
 
-  const videoStyle = maskDataUrl ? {
-    WebkitMaskImage: `url(${maskDataUrl})`,
-    maskImage: `url(${maskDataUrl})`,
+  const videoStyle = maskUrl ? {
+    WebkitMaskImage: `url(${maskUrl})`,
+    maskImage: `url(${maskUrl})`,
   } : {
     WebkitMaskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 260'%3E%3Ctext x='600' y='245' text-anchor='middle' font-family='Arial Rounded MT Bold%2C Impact%2C sans-serif' font-weight='900' font-size='215' letter-spacing='-4' fill='white'%3EHalloon%3C%2Ftext%3E%3C%2Fsvg%3E")`,
     maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 260'%3E%3Ctext x='600' y='245' text-anchor='middle' font-family='Arial Rounded MT Bold%2C Impact%2C sans-serif' font-weight='900' font-size='215' letter-spacing='-4' fill='white'%3EHalloon%3C%2Ftext%3E%3C%2Fsvg%3E")`,
@@ -103,7 +121,6 @@ export default function Hero({ introDone }) {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { overflow-x: hidden; }
 
-        /* ── DESKTOP ── */
         #hero-root {
           position: relative;
           width: 100%;
@@ -115,9 +132,9 @@ export default function Hero({ introDone }) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          /* ✅ overlap next section by 3px to kill the gap line for good */
-          margin-bottom: -3px;
-          padding-bottom: 3px;
+          /* FIX: remove all bottom spacing */
+          margin-bottom: 0;
+          padding-bottom: 0;
         }
 
         #hero-root::before {
@@ -131,28 +148,27 @@ export default function Hero({ introDone }) {
           z-index: 1;
         }
 
-        /* Top content block */
         #hero-content {
           position: relative;
           z-index: 10;
-          padding-top: 100px;
+          padding-top: 110px;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
           pointer-events: none;
           width: 100%;
-          /* ✅ don't grow — let it sit naturally at top */
           flex-shrink: 0;
+          gap: 6px;
         }
 
         .tl-eyebrow {
-          font-size: 0.62rem;
+          font-size: 0.58rem;
           font-weight: 700;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(28,61,40,0.4);
-          margin-bottom: 18px;
+          color: rgba(28,61,40,0.35);
+          margin-bottom: 10px;
           display: block;
         }
 
@@ -163,7 +179,7 @@ export default function Hero({ introDone }) {
           gap: 0.22em;
           font-family: 'Bricolage Grotesque', sans-serif;
           font-weight: 800;
-          font-size: clamp(2rem, 4vw, 4rem);
+          font-size: clamp(1.1rem, 2vw, 2rem);
           color: var(--text-main);
           line-height: 1.05;
           letter-spacing: -0.03em;
@@ -173,45 +189,44 @@ export default function Hero({ introDone }) {
         .tl-word-slot {
           display: inline-flex;
           align-items: baseline;
-          min-width: 4ch;
+          min-width: 7ch;
         }
         .tl-word { display: inline-block; white-space: nowrap; }
 
         .tl-line2 {
           font-family: 'Caveat', cursive;
           font-weight: 700;
-          font-size: clamp(4rem, 9vw, 9.5rem);
+          font-size: clamp(2rem, 4.5vw, 4.5rem);
           color: var(--text-main);
           letter-spacing: -0.02em;
           line-height: 0.95;
           display: block;
-          margin-top: -0.05em;
+          margin-top: 0;
         }
 
         .tl-sub {
-          margin-top: 16px;
-          font-size: clamp(0.82rem, 1vw, 1rem);
-          color: rgba(28,61,40,0.5);
-          line-height: 1.7;
-          max-width: 26rem;
+          margin-top: 8px;
+          font-size: clamp(0.7rem, 0.8vw, 0.82rem);
+          color: rgba(28,61,40,0.45);
+          line-height: 1.65;
+          max-width: 22rem;
           display: block;
         }
         .tl-sub strong { color: var(--forest); font-weight: 700; }
 
-        /* Button */
         #explore-center {
           position: relative;
           z-index: 10;
-          margin-top: 32px;
+          margin-top: 18px;
           flex-shrink: 0;
           pointer-events: all;
         }
 
         .h-btn-p {
-          padding: 12px 26px;
+          padding: 9px 20px;
           background: var(--forest);
           color: var(--cream);
-          font-size: 0.7rem;
+          font-size: 0.62rem;
           border-radius: 9999px;
           font-weight: 700;
           border: none;
@@ -228,21 +243,22 @@ export default function Hero({ introDone }) {
 
         .h-btn-icon { display: none; }
 
-        /* ✅ Halloon: use mt-auto to push it to the BOTTOM of the flex column
-           This guarantees max distance from the button regardless of vh */
+        /* Halloon layer */
         #halloon-layer {
           position: relative;
           width: 100%;
-          /* mt-auto pushes it all the way to the bottom */
           margin-top: auto;
-          /* A little extra gap between button and Halloon */
-          padding-top: 20px;
-          height: calc(100vw * 0.22);
+          padding-top: 10px;
+          height: calc(100vw * 0.28);
           z-index: 2;
           pointer-events: none;
           flex-shrink: 0;
-          /* ✅ extend 3px below so it overlaps and hides gap line */
-          margin-bottom: -3px;
+          /* FIX: remove bottom gap */
+          margin-bottom: 0;
+          padding-bottom: 0;
+          display: block;
+          line-height: 0;
+          font-size: 0;
         }
 
         #halloon-layer video {
@@ -253,7 +269,7 @@ export default function Hero({ introDone }) {
           object-fit: cover;
           object-position: center center;
           display: block;
-          opacity: 0.9;
+          opacity: 0.92;
           -webkit-mask-repeat: no-repeat;
           -webkit-mask-position: center;
           -webkit-mask-size: 100% auto;
@@ -263,8 +279,8 @@ export default function Hero({ introDone }) {
         }
 
         .corner-mark {
-          position: absolute; width: 18px; height: 18px;
-          opacity: 0.12; pointer-events: none; z-index: 5;
+          position: absolute; width: 14px; height: 14px;
+          opacity: 0.1; pointer-events: none; z-index: 5;
         }
         .corner-mark::before, .corner-mark::after {
           content: ''; position: absolute; background: var(--forest);
@@ -286,7 +302,7 @@ export default function Hero({ introDone }) {
             align-items: center;
             justify-content: flex-start;
             padding-bottom: 0;
-            margin-bottom: -3px;
+            margin-bottom: 0;
           }
 
           .corner-mark { display: none; }
@@ -298,10 +314,11 @@ export default function Hero({ introDone }) {
             text-align: center;
             pointer-events: all;
             width: 100%;
+            gap: 4px;
           }
 
           .tl-line1 {
-            font-size: clamp(2rem, 8.5vw, 3rem);
+            font-size: clamp(1rem, 5vw, 1.5rem);
             white-space: normal;
             flex-wrap: wrap;
             justify-content: center;
@@ -309,17 +326,23 @@ export default function Hero({ introDone }) {
             line-height: 1.1;
           }
 
+          .tl-word-slot {
+            min-width: 8ch;
+          }
+
           .tl-line2 {
-            font-size: clamp(3.5rem, 15vw, 6rem);
+            font-size: clamp(2rem, 9vw, 3.5rem);
+            white-space: nowrap;
             margin-top: 0;
+            line-height: 0.9;
             text-align: center;
           }
 
           .tl-sub {
-            font-size: 0.88rem;
+            font-size: 0.72rem;
             max-width: 100%;
-            margin-top: 12px;
-            color: rgba(28,61,40,0.55);
+            margin-top: 6px;
+            color: rgba(28,61,40,0.5);
             text-align: center;
           }
 
@@ -331,7 +354,7 @@ export default function Hero({ introDone }) {
             align-items: center;
             gap: 10px;
             font-family: 'DM Sans', sans-serif;
-            font-size: 0.7rem;
+            font-size: 0.62rem;
             font-weight: 700;
             letter-spacing: 0.15em;
             text-transform: uppercase;
@@ -340,47 +363,22 @@ export default function Hero({ introDone }) {
             background: none;
             border: none;
             padding: 0;
-            margin-top: 18px;
-            opacity: 0.75;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            opacity: 0.65;
             pointer-events: all;
-          }
-          .h-btn-icon .icon-circle {
-            width: 30px;
-            height: 30px;
-            border: 1.5px solid currentColor;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
           }
 
           #halloon-layer {
-            /* On mobile, back to relative flow — no mt-auto needed */
             position: relative !important;
-            margin-top: 24px !important;
+            margin-top: 6px !important;
             padding-top: 0 !important;
             width: 100vw;
-            height: calc(100vw * 0.36);
-            margin-bottom: -3px;
+            height: calc(100vw * 0.48);
+            margin-bottom: 0;
             z-index: 2;
-          }
-
-          #halloon-layer video {
-            position: absolute !important;
-            inset: 0 !important;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center center;
-            display: block;
-            opacity: 0.9;
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: center center;
-            -webkit-mask-size: 100% auto;
-            mask-repeat: no-repeat;
-            mask-position: center center;
-            mask-size: 100% auto;
+            line-height: 0;
+            font-size: 0;
           }
 
           #halloon-and-cta {
@@ -388,7 +386,9 @@ export default function Hero({ introDone }) {
             flex-direction: column;
             align-items: center;
             width: 100%;
+            margin-top: 0 !important;
             margin-bottom: 0;
+            padding-bottom: 0;
           }
         }
       `}</style>
@@ -401,7 +401,7 @@ export default function Hero({ introDone }) {
         <motion.div
           id="hero-content"
           initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={introDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <span className="tl-eyebrow">Media &amp; Advertising Consultancy</span>
@@ -437,20 +437,19 @@ export default function Hero({ introDone }) {
         <motion.div
           id="explore-center"
           initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={introDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
           transition={{ delay: 0.75, duration: 0.6 }}
         >
           <button className="h-btn-p" onClick={() => smoothScrollTo('#services')}>
-            Explore Services <ArrowRight size={12} />
+            Explore Services <ArrowRight size={11} />
           </button>
         </motion.div>
 
-        {/* Halloon — mt-auto on desktop pushes it to bottom of the 100svh container */}
-        <div id="halloon-and-cta" style={{ width: '100%', marginTop: 'auto' }}>
+        <div id="halloon-and-cta" style={{ width: '100%', marginTop: 'auto', marginBottom: 0, paddingBottom: 0 }}>
           <motion.div
             id="halloon-layer"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={introDone ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 1.2, ease: 'easeOut' }}
           >
             <video
@@ -464,12 +463,12 @@ export default function Hero({ introDone }) {
             className="h-btn-icon"
             onClick={() => smoothScrollTo('#services')}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={introDone ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 1, duration: 0.6 }}
           >
             Explore Services
             <span className="icon-circle">
-              <ArrowRight size={13} />
+              <ArrowRight size={12} />
             </span>
           </motion.button>
         </div>
