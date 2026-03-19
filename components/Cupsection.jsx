@@ -13,14 +13,12 @@ const styles = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    
     font-family: 'Bricolage Grotesque', sans-serif;
   }
 
   /* ── DESKTOP ── */
   .hero-wrapper {
-  background: #F0EBE3;
-    /* FIX: remove top padding so no gap between Hero and HeroSection */
+    background: #F0EBE3;
     padding: 0 28px 28px 28px;
   }
 
@@ -231,36 +229,79 @@ export default function HeroSection() {
       const el = heroRef.current;
       if (!el) return;
 
+      // FIX 1: getBoundingClientRect() inside ScrollSmoother returns the
+      // *visually transformed* position, not the element's real document
+      // offset. This caused the parallax to jump or freeze because the
+      // rect.top changed with scroll (as expected) but adding scrollY
+      // double-counted the displacement.
+      //
+      // Correct approach: use offsetTop to get the element's true document
+      // position, which is unaffected by ScrollSmoother's transform.
       const scrollY = window.__smoother
         ? window.__smoother.scrollTop()
         : window.scrollY;
 
-      const rect = el.getBoundingClientRect();
-      const elTop = rect.top + scrollY;
-      const elHeight = rect.height;
+      // Walk up the offset chain to get real document top
+      let elTop = 0;
+      let node = el;
+      while (node) {
+        elTop += node.offsetTop;
+        node = node.offsetParent;
+      }
+
+      const elHeight = el.offsetHeight;
       const viewH = window.innerHeight;
 
       const progress = (scrollY - elTop + viewH) / (elHeight + viewH);
       rawProgress.set(Math.min(1, Math.max(0, progress)));
     };
 
-    gsap.ticker.add(update);
-    return () => gsap.ticker.remove(update);
+    // FIX 2: Only run the ticker when the component is visible (IntersectionObserver).
+    // Previously the GSAP ticker ran unconditionally, recalculating scroll
+    // math on every frame even when the section was far off-screen.
+    let active = false;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        active = entry.isIntersecting;
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (heroRef.current) observer.observe(heroRef.current);
+
+    const ticker = () => { if (active) update(); };
+    gsap.ticker.add(ticker);
+
+    return () => {
+      gsap.ticker.remove(ticker);
+      observer.disconnect();
+    };
   }, [isMobile, rawProgress]);
 
   const cupY  = useTransform(rawProgress, [0, 1], [0, -80]);
+
+  // FIX 3: Increase spring stiffness and damping so the blob actually
+  // keeps up with scroll. stiffness:40/damping:20 was severely underdamped
+  // — the blob lagged several seconds behind and never settled.
+  // stiffness:120/damping:20 gives a snappy but still smooth follow.
   const blobY = useSpring(
     useTransform(rawProgress, [0, 1], [0, 80]),
-    { stiffness: 40, damping: 20 }
+    { stiffness: 120, damping: 20 }
   );
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
   const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left);
-    mouseY.set(e.clientY - rect.top);
+    // FIX 4: Use e.nativeEvent.offsetX/offsetY instead of
+    // clientX - rect.left. Inside ScrollSmoother, getBoundingClientRect()
+    // returns the visually-transformed rect, so clientX - rect.left
+    // could be significantly offset when the smoother has translated
+    // the content. offsetX/offsetY are always relative to the element's
+    // own local coordinate space, unaffected by any parent transforms.
+    mouseX.set(e.nativeEvent.offsetX);
+    mouseY.set(e.nativeEvent.offsetY);
   };
 
   return (

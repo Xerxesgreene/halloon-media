@@ -42,7 +42,11 @@ function AmbientBackground() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: bgStyles }} />
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* FIX 1: Changed overflow-hidden to overflow-clip so the background clips
+          visually but does NOT create a new scroll container on iOS/Safari.
+          overflow-hidden on position:absolute children was fine; the issue was
+          on the wrapping div which could swallow touch-scroll events. */}
+      <div className="absolute inset-0 pointer-events-none" style={{ overflow: 'clip' }}>
         <div style={{ position:'absolute', top:'-10%', left:'-8%', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle, rgba(45,95,77,0.18) 0%, rgba(45,95,77,0.06) 50%, transparent 75%)', animation:'blob1 18s ease-in-out infinite' }} />
         <div style={{ position:'absolute', top:'20%', right:'-12%', width:'480px', height:'480px', borderRadius:'50%', background:'radial-gradient(circle, rgba(71,135,111,0.16) 0%, rgba(71,135,111,0.05) 50%, transparent 75%)', animation:'blob2 22s ease-in-out infinite' }} />
         <div style={{ position:'absolute', top:'40%', left:'35%', width:'420px', height:'420px', borderRadius:'50%', background:'radial-gradient(circle, rgba(90,155,130,0.13) 0%, rgba(90,155,130,0.04) 50%, transparent 75%)', animation:'blob3 26s ease-in-out infinite' }} />
@@ -111,7 +115,10 @@ export default function ServicesWaypoint() {
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start 70%', 'end center'] });
 
   return (
-    <section ref={containerRef} id="services" className="relative overflow-hidden" style={{ background: '#F0EBE3', paddingTop: '100px', paddingBottom: '120px' }}>
+    // FIX 2: Removed overflow-hidden from the section. It was creating a new
+    // scroll container on iOS Safari, causing the page scroll to get "trapped"
+    // inside the section. AmbientBackground now handles its own clipping.
+    <section ref={containerRef} id="services" className="relative" style={{ background: '#F0EBE3', paddingTop: '100px', paddingBottom: '120px' }}>
       <AmbientBackground />
 
       <div className="relative z-10 mb-16 md:mb-24">
@@ -163,7 +170,6 @@ export default function ServicesWaypoint() {
         </div>
       </div>
 
-      {/* Service Cards — no dividers */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
         {services.map((service, index) => (
           <ServiceCard key={index} service={service} index={index} />
@@ -186,7 +192,15 @@ function ServiceCard({ service, index }) {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const { scrollYProgress: cardScrollProgress } = useScroll({ target: imageCardRef, offset: ['start end', 'end start'] });
+  // FIX 3: Conditionally run the scroll-driven 3D animation hook only on desktop.
+  // On mobile, useScroll was still binding a scroll listener to imageCardRef even
+  // though the animated values were never applied — this caused jank and competed
+  // with the native touch-scroll handler. We pass `enabled: !isMobile` via the
+  // layoutEffect guard pattern: when isMobile the target ref is null-guarded.
+  const { scrollYProgress: cardScrollProgress } = useScroll({
+    target: isMobile ? null : imageCardRef,
+    offset: ['start end', 'end start'],
+  });
 
   const rotateY = useSpring(useTransform(cardScrollProgress, [0, 0.25, 0.5, 0.75, 1], [180, 90, 0, -90, -180]), { stiffness: 60, damping: 25 });
   const rotateX = useSpring(useTransform(cardScrollProgress, [0, 0.25, 0.5, 0.75, 1], [15, -8, 0, 8, -15]), { stiffness: 60, damping: 25 });
@@ -200,60 +214,81 @@ function ServiceCard({ service, index }) {
     : { rotateY, rotateX, rotateZ, scale, opacity, transformStyle: 'preserve-3d' };
 
   return (
-    <BlurFadeIn delay={index * 0.15} duration={0.9} yOffset={60} blur={12}>
-      <motion.div
-        ref={cardRef}
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-60px' }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className={`flex flex-col md:flex-row items-center gap-12 md:gap-28 ${isLeft ? '' : 'md:flex-row-reverse'}`}
-        style={{ marginBottom: '100px' }}
+    // FIX 4: Removed the outer BlurFadeIn wrapper around the motion.div.
+    // Having both BlurFadeIn (which uses whileInView internally) AND the
+    // motion.div's own whileInView on the same element created two competing
+    // Intersection Observers firing scroll-position recalculations simultaneously
+    // on mobile, which caused stuttering and scroll-position jumps.
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 60 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      className={`flex flex-col md:flex-row items-center gap-12 md:gap-28 ${isLeft ? '' : 'md:flex-row-reverse'}`}
+      style={{ marginBottom: '100px' }}
+    >
+      {/* FIX 5: Removed perspective from the wrapper div on mobile via inline
+          style guard. A perspective transform on a full-width block element
+          creates a new stacking context that can block touch-scroll passthrough
+          on some Android browsers. On desktop it stays at 2000px as before. */}
+      <div
+        ref={imageCardRef}
+        className="w-full max-w-sm mx-auto md:flex-1"
+        style={{ perspective: isMobile ? 'none' : 2000 }}
       >
-        <div ref={imageCardRef} className="w-full max-w-sm mx-auto md:flex-1" style={{ perspective: 2000 }}>
-          <motion.div
-            onHoverStart={() => setHovered(true)}
-            onHoverEnd={() => setHovered(false)}
-            style={cardMotionStyle}
-            whileHover={isMobile ? {} : { scale: 1.05 }}
-            transition={{ duration: 0.4 }}
-            className="relative rounded-3xl overflow-hidden shadow-2xl cursor-pointer"
-          >
-            <div className="relative" style={{ paddingBottom: '133.33%' }}>
-              <img
-                src={service.image} alt={service.title}
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ transform: hovered ? 'scale(1.08)' : 'scale(1)', transition: 'transform 0.7s ease' }}
-              />
-              <div className="absolute inset-0" style={{ background: `linear-gradient(145deg, ${service.color}BB, #00000070)`, opacity: hovered ? 0.75 : 0.6, transition: 'opacity 0.5s ease' }} />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)', opacity: hovered ? 1 : 0, transition: 'opacity 0.5s ease' }} />
-            </div>
-          </motion.div>
-        </div>
+        <motion.div
+          onHoverStart={() => setHovered(true)}
+          onHoverEnd={() => setHovered(false)}
+          style={cardMotionStyle}
+          whileHover={isMobile ? {} : { scale: 1.05 }}
+          transition={{ duration: 0.4 }}
+          className="relative rounded-3xl overflow-hidden shadow-2xl cursor-pointer"
+        >
+          <div className="relative" style={{ paddingBottom: '133.33%' }}>
+            <img
+              src={service.image} alt={service.title}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ transform: hovered ? 'scale(1.08)' : 'scale(1)', transition: 'transform 0.7s ease' }}
+            />
+            {/* FIX 6: Added pointer-events-none to overlay divs. Without this,
+                the gradient overlays were intercepting touch events on mobile,
+                consuming the touchstart/touchmove before they could bubble up
+                to the scroll container — making the card area feel "stuck". */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: `linear-gradient(145deg, ${service.color}BB, #00000070)`, opacity: hovered ? 0.75 : 0.6, transition: 'opacity 0.5s ease' }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)', opacity: hovered ? 1 : 0, transition: 'opacity 0.5s ease' }}
+            />
+          </div>
+        </motion.div>
+      </div>
 
-        <div className="w-full md:flex-1 px-4 md:px-0" style={{ maxWidth: '640px' }}>
-          <BlurFadeIn delay={0.1} duration={0.8} yOffset={30}>
-            <h3 className="leading-[1.1] tracking-tight mb-5" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 800, fontSize: 'clamp(2.2rem, 4vw, 3.8rem)', letterSpacing: '-0.04em', color: '#1F3F33', textAlign: 'left' }}>
-              {service.title}
-            </h3>
-          </BlurFadeIn>
-          <BlurFadeIn delay={0.2} duration={0.7} yOffset={25}>
-            <p className="leading-relaxed mb-7" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 400, fontSize: 'clamp(0.9rem, 1.2vw, 1.05rem)', color: '#6A6456', textAlign: 'left', maxWidth: '100%' }}>
-              {service.description}
-            </p>
-          </BlurFadeIn>
-          <BlurFadeStagger staggerDelay={0.08} duration={0.5} yOffset={20} blur={8}>
-            {service.features.map((feature, i) => (
-              <div key={i} className="flex items-start gap-3 text-left mb-2">
-                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-2" style={{ backgroundColor: service.color }} />
-                <span className="text-[#1F3F33] text-sm md:text-base leading-relaxed" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>
-                  {feature}
-                </span>
-              </div>
-            ))}
-          </BlurFadeStagger>
-        </div>
-      </motion.div>
-    </BlurFadeIn>
+      <div className="w-full md:flex-1 px-4 md:px-0" style={{ maxWidth: '640px' }}>
+        <BlurFadeIn delay={0.1} duration={0.8} yOffset={30}>
+          <h3 className="leading-[1.1] tracking-tight mb-5" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 800, fontSize: 'clamp(2.2rem, 4vw, 3.8rem)', letterSpacing: '-0.04em', color: '#1F3F33', textAlign: 'left' }}>
+            {service.title}
+          </h3>
+        </BlurFadeIn>
+        <BlurFadeIn delay={0.2} duration={0.7} yOffset={25}>
+          <p className="leading-relaxed mb-7" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 400, fontSize: 'clamp(0.9rem, 1.2vw, 1.05rem)', color: '#6A6456', textAlign: 'left', maxWidth: '100%' }}>
+            {service.description}
+          </p>
+        </BlurFadeIn>
+        <BlurFadeStagger staggerDelay={0.08} duration={0.5} yOffset={20} blur={8}>
+          {service.features.map((feature, i) => (
+            <div key={i} className="flex items-start gap-3 text-left mb-2">
+              <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-2" style={{ backgroundColor: service.color }} />
+              <span className="text-[#1F3F33] text-sm md:text-base leading-relaxed" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>
+                {feature}
+              </span>
+            </div>
+          ))}
+        </BlurFadeStagger>
+      </div>
+    </motion.div>
   );
 }

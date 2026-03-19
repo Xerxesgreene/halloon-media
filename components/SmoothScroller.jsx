@@ -11,28 +11,31 @@ export default function SmoothScroller({ children }) {
   const smootherRef = useRef(null);
 
   useEffect(() => {
+    // Guard: already initialized
     if (smootherRef.current) return;
 
-    // Normalize scroll here (client-only, after GSAP is ready)
-    ScrollTrigger.normalizeScroll(true);
+    // DO NOT use normalizeScroll with ScrollSmoother —
+    // they both intercept native scroll and will conflict,
+    // causing stuttering and incorrect scroll position reads.
 
-    const initTimer = setTimeout(() => {
-      smootherRef.current = ScrollSmoother.create({
-        wrapper: '#smooth-wrapper',
-        content: '#smooth-content',
-        smooth: 0.8,
-        effects: false,
-        smoothTouch: 0,       // ← use 0 (number) not false — more reliable
-        ignoreMobileResize: true, // ← prevents ScrollTrigger refresh on mobile keyboard open
-      });
+    smootherRef.current = ScrollSmoother.create({
+      wrapper: '#smooth-wrapper',
+      content: '#smooth-content',
+      smooth: 1.2,          // slightly higher = more buttery feel
+      effects: false,
+      smoothTouch: 0,       // disable on touch — GSAP smoothTouch is unreliable on iOS
+      ignoreMobileResize: true,
+    });
 
-      ScrollTrigger.refresh();
+    // Expose globally so other components (e.g. nav links) can call
+    // window.__smoother.scrollTo('#section', true) for smooth anchoring
+    window.__smoother = smootherRef.current;
 
-      window.__smoother = smootherRef.current;
-    }, 3100);
+    // Single refresh after creation — do NOT delay this, it must run
+    // synchronously after create() so ScrollTrigger bounds are correct.
+    ScrollTrigger.refresh();
 
     return () => {
-      clearTimeout(initTimer);
       smootherRef.current?.kill();
       smootherRef.current = null;
       window.__smoother = null;
@@ -40,11 +43,14 @@ export default function SmoothScroller({ children }) {
   }, []);
 
   return (
+    // overflow:hidden on wrapper is intentional — ScrollSmoother needs it.
+    // Do NOT add position:fixed here; let the document flow normally.
+    // ScrollSmoother handles the fixed positioning of smooth-content internally.
     <div
       id="smooth-wrapper"
-      style={{ overflow: 'hidden', height: '100vh', width: '100%', position: 'fixed', top: 0, left: 0, zIndex: 1 }}
+      style={{ overflow: 'hidden' }}
     >
-      <div id="smooth-content" style={{ willChange: 'transform', overflowX: 'hidden' }}>
+      <div id="smooth-content">
         {children}
       </div>
     </div>

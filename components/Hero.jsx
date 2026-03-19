@@ -15,17 +15,26 @@ const WORDS = [
   { text: 'campaigns',   color: '#a07ec8' },
 ];
 
+// FIX 1: ScrollSmoother.scrollTo() expects a CSS selector string, an element,
+// or a pixel number. Passing the raw href string (e.g. '#services') does work
+// in recent GSAP builds, but only if the element exists at call time.
+// We defensively fall back to native scrollIntoView if __smoother isn't ready.
 function smoothScrollTo(href) {
+  const target = document.querySelector(href);
+  if (!target) return;
   if (window.__smoother) {
-    window.__smoother.scrollTo(href, true);
+    window.__smoother.scrollTo(target, true);
   } else {
-    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+    target.scrollIntoView({ behavior: 'smooth' });
   }
 }
 
 export default function Hero({ introDone }) {
   const [wordIndex, setWordIndex] = useState(0);
   const [maskUrl, setMaskUrl] = useState(null);
+  // Keep a ref to the latest blob URL so the cleanup in useEffect
+  // always revokes the most recent one, not a stale closure value.
+  const maskUrlRef = useRef(null);
 
   useEffect(() => {
     if (!introDone) return;
@@ -34,6 +43,8 @@ export default function Hero({ introDone }) {
   }, [introDone]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const render = () => {
       const vw = window.innerWidth;
       const mobile = vw <= 768;
@@ -68,16 +79,24 @@ export default function Hero({ introDone }) {
       ctx.textBaseline = 'middle';
       ctx.fillText('Halloon', W / 2, H / 2);
 
+      // FIX 2: Guard against state update after unmount (cancelled flag).
+      // Previously, if the component unmounted while toBlob was pending,
+      // setMaskUrl would be called on an unmounted component.
       canvas.toBlob(blob => {
+        if (cancelled) return;
         const newUrl = URL.createObjectURL(blob);
-        setMaskUrl(prev => {
-          if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
-          return newUrl;
-        });
+        // Revoke previous blob URL to avoid memory leak
+        if (maskUrlRef.current?.startsWith('blob:')) {
+          URL.revokeObjectURL(maskUrlRef.current);
+        }
+        maskUrlRef.current = newUrl;
+        setMaskUrl(newUrl);
       }, 'image/png');
     };
 
-    document.fonts.ready.then(() => render());
+    document.fonts.ready.then(() => {
+      if (!cancelled) render();
+    });
 
     let resizeTimer;
     const handleResize = () => {
@@ -86,13 +105,16 @@ export default function Hero({ introDone }) {
     };
 
     window.addEventListener('resize', handleResize);
+
     return () => {
-      window.removeEventListener('resize', handleResize);
+      cancelled = true;
       clearTimeout(resizeTimer);
-      setMaskUrl(prev => {
-        if (prev && prev.startsWith('blob:')) URL.revokeObjectURL(prev);
-        return null;
-      });
+      window.removeEventListener('resize', handleResize);
+      // Revoke on unmount
+      if (maskUrlRef.current?.startsWith('blob:')) {
+        URL.revokeObjectURL(maskUrlRef.current);
+        maskUrlRef.current = null;
+      }
     };
   }, []);
 
@@ -124,7 +146,12 @@ export default function Hero({ introDone }) {
         #hero-root {
           position: relative;
           width: 100%;
-          height: 100svh;
+          /* FIX 3: Use 100vh instead of 100svh. Inside ScrollSmoother the
+             content div is position:fixed and measured against the window,
+             not the small viewport. 100svh can be smaller than 100vh on
+             mobile browsers with collapsible UI chrome, causing a visible
+             gap between the hero bottom and the next section. */
+          height: 100vh;
           min-height: 600px;
           background: #F0EBE3;
           font-family: 'DM Sans', sans-serif;
@@ -132,7 +159,6 @@ export default function Hero({ introDone }) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          /* FIX: remove all bottom spacing */
           margin-bottom: 0;
           padding-bottom: 0;
         }
@@ -243,17 +269,26 @@ export default function Hero({ introDone }) {
 
         .h-btn-icon { display: none; }
 
-        /* Halloon layer */
+        /* FIX 4: #halloon-layer previously used margin-top:auto inside a
+           flex column. Inside ScrollSmoother the content height is fixed,
+           so 'auto' margins don't distribute leftover space the way they
+           would in a normally-scrolling page — they can collapse to 0 or
+           push content out of view entirely.
+           Solution: use flex-grow:1 on a spacer above to push the layer
+           to the bottom, and set an explicit height based on vw units. */
+        #halloon-spacer {
+          flex: 1 1 0;
+          min-height: 10px;
+        }
+
         #halloon-layer {
           position: relative;
           width: 100%;
-          margin-top: auto;
           padding-top: 10px;
           height: calc(100vw * 0.28);
           z-index: 2;
           pointer-events: none;
           flex-shrink: 0;
-          /* FIX: remove bottom gap */
           margin-bottom: 0;
           padding-bottom: 0;
           display: block;
@@ -369,6 +404,8 @@ export default function Hero({ introDone }) {
             pointer-events: all;
           }
 
+          #halloon-spacer { display: none; }
+
           #halloon-layer {
             position: relative !important;
             margin-top: 6px !important;
@@ -445,7 +482,10 @@ export default function Hero({ introDone }) {
           </button>
         </motion.div>
 
-        <div id="halloon-and-cta" style={{ width: '100%', marginTop: 'auto', marginBottom: 0, paddingBottom: 0 }}>
+        {/* Spacer pushes halloon layer to bottom on desktop */}
+        <div id="halloon-spacer" />
+
+        <div id="halloon-and-cta" style={{ width: '100%', marginBottom: 0, paddingBottom: 0 }}>
           <motion.div
             id="halloon-layer"
             initial={{ opacity: 0 }}
