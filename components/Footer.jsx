@@ -143,7 +143,7 @@ export default function Footer() {
                     <MessageCircle className="w-5 h-5" fill="currentColor" />
                   </a>
                   <a
-                    href="https://www.instagram.com"
+                    href="https://www.instagram.com/halloon.media/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition-colors"
