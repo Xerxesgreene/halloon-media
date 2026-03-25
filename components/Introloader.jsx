@@ -13,7 +13,7 @@ function LoaderContent({ visible }) {
           key="intro-loader"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.02 }}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
+          transition={{ duration: 0.35, ease: 'easeInOut' }}
           style={{
             position: 'fixed',
             inset: 0,
@@ -54,13 +54,14 @@ function LoaderContent({ visible }) {
             <motion.div
               initial={{ scale: 0.75, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
               style={{ position: 'relative', width: 52, height: 52, flexShrink: 0 }}
             >
               <Image src="/h3.png" alt="Halloon Media" fill className="object-contain" priority />
             </motion.div>
 
-            <div style={{ overflow: 'hidden' }}>
+            {/* ✅ Removed overflow:hidden — was clipping the y-translate animation */}
+            <div>
               <h1 style={{
                 fontSize: 'clamp(2rem, 5vw, 3.5rem)',
                 fontWeight: 800,
@@ -75,11 +76,11 @@ function LoaderContent({ visible }) {
                 {'Halloon Media'.split('').map((char, i) => (
                   <motion.span
                     key={i}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
-                      duration: 0.5,
-                      delay: 0.4 + i * 0.045,
+                      duration: 0.35,
+                      delay: 0.1 + i * 0.028,
                       ease: [0.22, 1, 0.36, 1],
                     }}
                     style={{ display: 'inline-block' }}
@@ -95,7 +96,7 @@ function LoaderContent({ visible }) {
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             style={{
               position: 'absolute',
               bottom: 0, left: 0, right: 0,
@@ -118,10 +119,10 @@ export default function IntroLoader({ onComplete }) {
   useEffect(() => {
     setMounted(true);
 
-    const hideTimer = setTimeout(() => setVisible(false), 2400);
+    const hideTimer = setTimeout(() => setVisible(false), 1300);
     const doneTimer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 3000);
+    }, 1650);
 
     return () => {
       clearTimeout(hideTimer);

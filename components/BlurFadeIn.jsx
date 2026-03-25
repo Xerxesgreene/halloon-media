@@ -1,47 +1,53 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 
 /**
- * BlurFadeIn - Smooth pop-up fade animation (no blur)
- * All props preserved for backwards compatibility.
+ * BlurFadeIn - Smooth fade-up animation
  */
 export default function BlurFadeIn({
   children,
   delay = 0,
-  duration = 0.6,
-  blur = 0,        // kept in signature but ignored
-  yOffset = 20,
+  duration = 0.5,
+  blur = 0,
+  yOffset = 14,
   threshold = 0.1,
   once = true,
   className = '',
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, {
-    once,
-    amount: threshold,
-  });
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          if (once) observer.disconnect();
+        } else if (!once) {
+          setInView(false);
+        }
+      },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [once, threshold]);
 
   return (
     <motion.div
       ref={ref}
-      initial={{
-        opacity: 0,
-        y: yOffset,
-        scale: 0.97,
-      }}
-      animate={
-        isInView
-          ? { opacity: 1, y: 0, scale: 1 }
-          : { opacity: 0, y: yOffset, scale: 0.97 }
-      }
+      initial={{ opacity: 0, y: yOffset }}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: yOffset }}
       transition={{
         duration,
         delay,
         ease: [0.22, 1, 0.36, 1],
       }}
+      style={{ willChange: 'opacity, transform' }}
       className={className}
     >
       {children}
@@ -50,38 +56,45 @@ export default function BlurFadeIn({
 }
 
 /**
- * BlurFadeText - Character-by-character pop-up animation
- * All props preserved for backwards compatibility.
+ * BlurFadeText - Character-by-character fade-up animation
  */
 export function BlurFadeText({
   text = '',
   delay = 0,
-  charDelay = 0.03,
-  duration = 0.4,
+  charDelay = 0.025,
+  duration = 0.35,
   className = '',
   style = {},
   as = 'p',
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, {
-    once: true,
-    amount: 0.5,
-  });
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const Component = as;
-  const chars = text.split('');
 
   return (
     <Component ref={ref} className={className} style={style}>
-      {chars.map((char, index) => (
+      {text.split('').map((char, index) => (
         <motion.span
           key={`${char}-${index}`}
-          initial={{ opacity: 0, y: 8, scale: 0.95 }}
-          animate={
-            isInView
-              ? { opacity: 1, y: 0, scale: 1 }
-              : { opacity: 0, y: 8, scale: 0.95 }
-          }
+          initial={{ opacity: 0, y: 6 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
           transition={{
             duration,
             delay: delay + index * charDelay,
@@ -90,6 +103,7 @@ export function BlurFadeText({
           style={{
             display: 'inline-block',
             whiteSpace: char === ' ' ? 'pre' : 'normal',
+            willChange: 'opacity, transform',
           }}
         >
           {char === ' ' ? '\u00A0' : char}
@@ -100,22 +114,34 @@ export function BlurFadeText({
 }
 
 /**
- * BlurFadeStagger - Stagger pop-up animation for multiple children
- * All props preserved for backwards compatibility.
+ * BlurFadeStagger - Staggered fade-up for multiple children
  */
 export function BlurFadeStagger({
   children,
-  staggerDelay = 0.1,
-  duration = 0.6,
-  blur = 0,        // kept in signature but ignored
-  yOffset = 20,
+  staggerDelay = 0.08,
+  duration = 0.5,
+  blur = 0,
+  yOffset = 14,
   className = '',
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, {
-    once: true,
-    amount: 0.1,
-  });
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const childrenArray = Array.isArray(children) ? children : [children];
 
@@ -124,17 +150,14 @@ export function BlurFadeStagger({
       {childrenArray.map((child, index) => (
         <motion.div
           key={index}
-          initial={{ opacity: 0, y: yOffset, scale: 0.97 }}
-          animate={
-            isInView
-              ? { opacity: 1, y: 0, scale: 1 }
-              : { opacity: 0, y: yOffset, scale: 0.97 }
-          }
+          initial={{ opacity: 0, y: yOffset }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: yOffset }}
           transition={{
             duration,
             delay: index * staggerDelay,
             ease: [0.22, 1, 0.36, 1],
           }}
+          style={{ willChange: 'opacity, transform' }}
         >
           {child}
         </motion.div>

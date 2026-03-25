@@ -15,10 +15,6 @@ const WORDS = [
   { text: 'campaigns',   color: '#a07ec8' },
 ];
 
-// FIX 1: ScrollSmoother.scrollTo() expects a CSS selector string, an element,
-// or a pixel number. Passing the raw href string (e.g. '#services') does work
-// in recent GSAP builds, but only if the element exists at call time.
-// We defensively fall back to native scrollIntoView if __smoother isn't ready.
 function smoothScrollTo(href) {
   const target = document.querySelector(href);
   if (!target) return;
@@ -32,8 +28,7 @@ function smoothScrollTo(href) {
 export default function Hero({ introDone }) {
   const [wordIndex, setWordIndex] = useState(0);
   const [maskUrl, setMaskUrl] = useState(null);
-  // Keep a ref to the latest blob URL so the cleanup in useEffect
-  // always revokes the most recent one, not a stale closure value.
+  const [maskReady, setMaskReady] = useState(false); // ← new: hide video until mask is correct
   const maskUrlRef = useRef(null);
 
   useEffect(() => {
@@ -45,7 +40,7 @@ export default function Hero({ introDone }) {
   useEffect(() => {
     let cancelled = false;
 
-    const render = () => {
+    const render = async () => {
       const vw = window.innerWidth;
       const mobile = vw <= 768;
       const dpr = window.devicePixelRatio || 1;
@@ -56,6 +51,28 @@ export default function Hero({ introDone }) {
       const W = Math.round(vw * dpr);
       const H = Math.round(W * heightRatio);
 
+      // ── FONT LOADING FIX ──────────────────────────────────────────────
+      // 1. Wait for ALL fonts to be ready first
+      await document.fonts.ready;
+
+      // 2. Explicitly load the specific weight/family we need for the mask.
+      //    This forces the browser to fetch & decode the font if it hasn't yet.
+      //    We try Bricolage Grotesque first, fall back gracefully.
+      const fontVariants = [
+        '800 100px "Bricolage Grotesque"',
+        '800 100px BricolageHero',
+      ];
+      await Promise.allSettled(
+        fontVariants.map(f => document.fonts.load(f))
+      );
+
+      // 3. Small tick to let the browser finish rasterising the newly-loaded font.
+      //    Without this, measureText can still return stale metrics on some engines.
+      await new Promise(r => setTimeout(r, 30));
+      // ─────────────────────────────────────────────────────────────────
+
+      if (cancelled) return;
+
       const canvas = document.createElement('canvas');
       canvas.width  = W;
       canvas.height = H;
@@ -63,7 +80,8 @@ export default function Hero({ introDone }) {
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = 'white';
 
-      const fontStack = `'BricolageHero', 'Bricolage Grotesque', 'Arial Rounded MT Bold', Impact, sans-serif`;
+      // Use the exact same font stack but now we know it's loaded
+      const fontStack = `'Bricolage Grotesque', 'BricolageHero', 'Arial Rounded MT Bold', Impact, sans-serif`;
 
       let lo = 10, hi = W * 1.5, bestSize = W * 0.2;
       for (let i = 0; i < 32; i++) {
@@ -79,24 +97,19 @@ export default function Hero({ introDone }) {
       ctx.textBaseline = 'middle';
       ctx.fillText('Halloon', W / 2, H / 2);
 
-      // FIX 2: Guard against state update after unmount (cancelled flag).
-      // Previously, if the component unmounted while toBlob was pending,
-      // setMaskUrl would be called on an unmounted component.
       canvas.toBlob(blob => {
         if (cancelled) return;
         const newUrl = URL.createObjectURL(blob);
-        // Revoke previous blob URL to avoid memory leak
         if (maskUrlRef.current?.startsWith('blob:')) {
           URL.revokeObjectURL(maskUrlRef.current);
         }
         maskUrlRef.current = newUrl;
         setMaskUrl(newUrl);
+        setMaskReady(true); // ← signal that mask is correct & ready to show
       }, 'image/png');
     };
 
-    document.fonts.ready.then(() => {
-      if (!cancelled) render();
-    });
+    render();
 
     let resizeTimer;
     const handleResize = () => {
@@ -110,7 +123,6 @@ export default function Hero({ introDone }) {
       cancelled = true;
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
-      // Revoke on unmount
       if (maskUrlRef.current?.startsWith('blob:')) {
         URL.revokeObjectURL(maskUrlRef.current);
         maskUrlRef.current = null;
@@ -146,11 +158,6 @@ export default function Hero({ introDone }) {
         #hero-root {
           position: relative;
           width: 100%;
-          /* FIX 3: Use 100vh instead of 100svh. Inside ScrollSmoother the
-             content div is position:fixed and measured against the window,
-             not the small viewport. 100svh can be smaller than 100vh on
-             mobile browsers with collapsible UI chrome, causing a visible
-             gap between the hero bottom and the next section. */
           height: 100vh;
           min-height: 600px;
           background: #F0EBE3;
@@ -269,13 +276,6 @@ export default function Hero({ introDone }) {
 
         .h-btn-icon { display: none; }
 
-        /* FIX 4: #halloon-layer previously used margin-top:auto inside a
-           flex column. Inside ScrollSmoother the content height is fixed,
-           so 'auto' margins don't distribute leftover space the way they
-           would in a normally-scrolling page — they can collapse to 0 or
-           push content out of view entirely.
-           Solution: use flex-grow:1 on a spacer above to push the layer
-           to the bottom, and set an explicit height based on vw units. */
         #halloon-spacer {
           flex: 1 1 0;
           min-height: 10px;
@@ -294,6 +294,8 @@ export default function Hero({ introDone }) {
           display: block;
           line-height: 0;
           font-size: 0;
+          /* Hide until mask is correctly rendered with the right font */
+          transition: opacity 0.4s ease;
         }
 
         #halloon-layer video {
@@ -361,9 +363,7 @@ export default function Hero({ introDone }) {
             line-height: 1.1;
           }
 
-          .tl-word-slot {
-            min-width: 8ch;
-          }
+          .tl-word-slot { min-width: 8ch; }
 
           .tl-line2 {
             font-size: clamp(2rem, 9vw, 3.5rem);
@@ -470,7 +470,6 @@ export default function Hero({ introDone }) {
           </span>
         </motion.div>
 
-        {/* Desktop pill button */}
         <motion.div
           id="explore-center"
           initial={{ opacity: 0, y: 10 }}
@@ -482,15 +481,14 @@ export default function Hero({ introDone }) {
           </button>
         </motion.div>
 
-        {/* Spacer pushes halloon layer to bottom on desktop */}
         <div id="halloon-spacer" />
 
         <div id="halloon-and-cta" style={{ width: '100%', marginBottom: 0, paddingBottom: 0 }}>
           <motion.div
             id="halloon-layer"
             initial={{ opacity: 0 }}
-            animate={introDone ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
+            animate={introDone && maskReady ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
           >
             <video
               src="/videos/video1.mp4"

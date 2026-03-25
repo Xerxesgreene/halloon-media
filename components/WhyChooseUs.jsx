@@ -22,7 +22,6 @@ const REASONS = [
 ];
 
 const POINTS = [
-  
   { icon: '🔄', label: '360° coverage — Strategy, digital, production, events and many more' },
   { icon: '🌍', label: 'Regional expertise — UAE, KSA, Qatar, Kuwait, India projects' },
   { icon: '👥', label: 'Dynamic team of 40+ skilled professionals' },
@@ -42,6 +41,8 @@ export default function WhyChooseUs() {
           background: #F0EBE3;
           font-family: 'DM Sans', sans-serif;
           overflow: hidden;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         /* ── HEADER ── */
@@ -50,7 +51,7 @@ export default function WhyChooseUs() {
           flex-direction: column;
           align-items: center;
           text-align: center;
-          gap: 24px;
+          gap: 16px;
           padding: 110px 24px 72px;
         }
         .wcu-eyebrow {
@@ -95,6 +96,10 @@ export default function WhyChooseUs() {
           border-top: 1px solid rgba(31,63,51,0.1);
           min-height: 680px;
         }
+        /* Make BlurFadeIn wrappers inside grid behave as grid children */
+        .wcu-split > div {
+          display: contents;
+        }
 
         /* LEFT */
         .wcu-img-panel {
@@ -102,7 +107,7 @@ export default function WhyChooseUs() {
           display: flex;
           align-items: flex-end;
           justify-content: center;
-          overflow: visible;
+          overflow: hidden;
           border-right: 1px solid rgba(31,63,51,0.1);
         }
         .wcu-watermark {
@@ -167,7 +172,7 @@ export default function WhyChooseUs() {
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
         }
         .wcu-point {
           display: flex;
@@ -212,6 +217,10 @@ export default function WhyChooseUs() {
           border-top: 1px solid rgba(31,63,51,0.1);
           border-bottom: 1px solid rgba(31,63,51,0.1);
         }
+        /* Make BlurFadeIn wrappers inside reasons grid behave correctly */
+        .wcu-reasons > div {
+          display: contents;
+        }
         .wcu-reason {
           padding: 40px clamp(20px, 3vw, 40px);
           border-right: 1px solid rgba(31,63,51,0.1);
@@ -241,28 +250,102 @@ export default function WhyChooseUs() {
 
         /* ── MOBILE ── */
         @media (max-width: 768px) {
-          .wcu-header { padding: 72px 20px 48px; }
-          .wcu-subtitle { max-width: 100%; text-align: justify; }
-          .wcu-split { grid-template-columns: 1fr; min-height: unset; }
+          .wcu-section {
+            overflow-x: hidden;
+          }
+
+          /* Header */
+          .wcu-header {
+            padding: 64px 20px 40px;
+            gap: 12px;
+            align-items: flex-start;
+            text-align: left;
+          }
+          .wcu-title {
+            font-size: clamp(2rem, 9vw, 2.8rem);
+            line-height: 1.08;
+          }
+          .wcu-subtitle {
+            max-width: 100%;
+            text-align: left;
+            font-size: 0.88rem;
+          }
+
+          /* Split — single column, BlurFadeIn wrappers become normal blocks */
+          .wcu-split {
+            grid-template-columns: 1fr;
+            min-height: unset;
+            border-top: 1px solid rgba(31,63,51,0.1);
+          }
+          .wcu-split > div {
+            display: block;
+          }
+
+          /* Image panel */
           .wcu-img-panel {
             border-right: none;
             border-bottom: 1px solid rgba(31,63,51,0.1);
-            min-height: 350px;
+            min-height: 280px;
+            max-height: 340px;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
           }
-          .wcu-img-panel img { width: 95vw; margin-bottom: 0; }
-          .wcu-watermark { font-size: 2.5rem; left: 2px; }
-          .wcu-right-panel { padding: 36px 20px; }
-          .wcu-right-para { text-align: justify; }
-          .wcu-point { padding: 10px 14px; }
-          .wcu-point-text { font-size: 0.84rem; }
-          .wcu-reasons { grid-template-columns: 1fr; }
+          .wcu-img-panel img {
+            width: 88vw;
+            max-width: 100%;
+            margin-bottom: 0;
+            object-fit: contain;
+          }
+          .wcu-watermark {
+            font-size: 2rem;
+            left: 4px;
+          }
+
+          /* Right panel */
+          .wcu-right-panel {
+            padding: 32px 20px 40px;
+          }
+          .wcu-right-label {
+            margin-bottom: 14px;
+          }
+          .wcu-right-para {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            text-align: left;
+          }
+
+          /* Points */
+          .wcu-points {
+            gap: 8px;
+          }
+          .wcu-point {
+            padding: 10px 14px;
+            border-radius: 10px;
+          }
+          .wcu-point-text {
+            font-size: 0.83rem;
+            line-height: 1.55;
+          }
+
+          /* Reasons — single column, BlurFadeIn wrappers become normal blocks */
+          .wcu-reasons {
+            grid-template-columns: 1fr;
+          }
+          .wcu-reasons > div {
+            display: block;
+          }
           .wcu-reason {
             border-right: none;
             border-bottom: 1px solid rgba(31,63,51,0.1);
             padding: 28px 20px;
           }
-          .wcu-reason:last-child { border-bottom: none; }
-          .wcu-reason-body { text-align: justify; }
+          .wcu-reason:last-child {
+            border-bottom: none;
+          }
+          .wcu-reason-body {
+            text-align: left;
+          }
         }
       `}</style>
 
@@ -298,8 +381,6 @@ export default function WhyChooseUs() {
                 <strong>360° media consultancy</strong> built to make your brand
                 visible, credible, and impossible to ignore.
               </p>
-
-              {/* ── POINT-WISE LIST FROM PDF ── */}
               <ul className="wcu-points">
                 {POINTS.map((p, i) => (
                   <li key={i} className="wcu-point">
