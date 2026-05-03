@@ -81,16 +81,16 @@ function MagneticCard({ s, i, isInView }) {
     >
       {/* Spotlight layer */}
       <div style={{
-        position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
-        borderRadius: 28, overflow: 'hidden',
+        position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none',
+        borderRadius: 28,
         opacity: hovered ? 1 : 0,
         transition: 'opacity 0.4s ease',
-        background: `radial-gradient(circle 180px at ${spotlight.x}% ${spotlight.y}%, rgba(120,198,154,0.12) 0%, transparent 70%)`,
+        background: `radial-gradient(circle 180px at ${spotlight.x}% ${spotlight.y}%, rgba(120,198,154,0.10) 0%, transparent 70%)`,
       }} />
 
       {/* Shimmer streak */}
       <div style={{
-        position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none',
+        position: 'absolute', inset: 0, zIndex: 11, pointerEvents: 'none',
         borderRadius: 28, overflow: 'hidden',
         opacity: hovered ? 1 : 0,
         transition: 'opacity 0.3s ease',
@@ -110,68 +110,61 @@ function MagneticCard({ s, i, isInView }) {
         background: `linear-gradient(90deg, ${s.accent}, transparent)`,
         opacity: hovered ? 1 : 0,
         transition: 'opacity 0.3s ease',
-        position: 'relative', zIndex: 1,
+        position: 'relative', zIndex: 5,
       }} />
 
-      {/* Media area */}
+      {/* ── IMAGE AREA — full width, fixed height ── */}
       <div style={{
-        background: hovered ? `linear-gradient(135deg, #e8f5ee 0%, #EDE8E0 100%)` : '#EDE8E0',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '44px 32px 36px',
-        position: 'relative', minHeight: 220, overflow: 'hidden',
-        transition: 'background 0.5s ease',
-        zIndex: 1,
+        position: 'relative',
+        width: '100%',
+        height: 240,
+        overflow: 'hidden',
+        flexShrink: 0,
       }}>
-        <span style={{
-          position: 'absolute', top: 16, right: 20,
-          fontWeight: 800, fontSize: '4rem',
-          color: hovered ? `rgba(28,61,40,0.12)` : 'rgba(28,61,40,0.06)',
-          letterSpacing: '-0.04em', lineHeight: 1,
-          transition: 'color 0.3s, transform 0.4s ease',
-          transform: hovered ? 'scale(1.1) translateY(-4px)' : 'scale(1)',
-          fontFamily: "'Bricolage Grotesque', sans-serif",
-        }}>{s.label}</span>
+      
 
-        <div style={{
-          position: 'absolute',
-          width: 180, height: 180, borderRadius: '50%',
-          border: `1px solid rgba(94,176,131,${hovered ? 0.25 : 0})`,
-          transition: 'all 0.5s ease',
-          transform: hovered ? 'scale(1.1)' : 'scale(0.8)',
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: 220, height: 220, borderRadius: '50%',
-          border: `1px solid rgba(94,176,131,${hovered ? 0.12 : 0})`,
-          transition: 'all 0.6s ease',
-          transform: hovered ? 'scale(1.1)' : 'scale(0.8)',
-        }} />
+        {/* Full-bleed image */}
+        <img
+          src={s.src}
+          alt={s.title}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            display: 'block',
+            zIndex: 1,
+            transition: 'transform 0.6s cubic-bezier(0.22,1,0.36,1)',
+            transform: hovered ? 'scale(1.05)' : 'scale(1)',
+          }}
+        />
 
-        {/* ── STATIC IMAGE (replaces LottieCard) ── */}
+        {/* Subtle overlay on hover */}
         <div style={{
-          transform: hovered ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
-          transition: 'transform 0.5s cubic-bezier(0.22,1,0.36,1)',
-          position: 'relative', zIndex: 2,
-        }}>
-          <img
-            src={s.src}
-            alt={s.title}
-            style={{
-              width: 200,
-              height: 160,
-              objectFit: 'contain',
-              display: 'block',
-            }}
-          />
-        </div>
+          position: 'absolute', inset: 0, zIndex: 3,
+          background: hovered
+            ? `linear-gradient(180deg, rgba(45,95,77,0.08) 0%, rgba(45,95,77,0.18) 100%)`
+            : 'transparent',
+          transition: 'background 0.4s ease',
+          pointerEvents: 'none',
+        }} />
       </div>
 
-      {/* Body */}
-      <div style={{ padding: '28px 32px 36px', flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+      {/* ── BODY ── */}
+      <div style={{
+        padding: '24px 28px 32px',
+        flex: 1, display: 'flex', flexDirection: 'column',
+        position: 'relative', zIndex: 1,
+      }}>
         <span style={{
           fontSize: '0.62rem', fontWeight: 600, letterSpacing: '0.2em',
-          textTransform: 'uppercase', color: s.color, marginBottom: 10,
+          textTransform: 'uppercase',
+          color: hovered ? s.color : 'rgba(28,61,40,0.4)',
+          marginBottom: 10,
           fontFamily: "'Bricolage Grotesque', sans-serif",
+          transition: 'color 0.3s ease',
         }}>Step {s.label}</span>
 
         <h3 style={{
@@ -183,7 +176,8 @@ function MagneticCard({ s, i, isInView }) {
         }}>{s.title}</h3>
 
         <p style={{
-          fontSize: '0.88rem', color: '#5A7A68', lineHeight: 1.8, margin: 0, flex: 1,
+          fontSize: '0.88rem', color: '#5A7A68', lineHeight: 1.8,
+          margin: 0, flex: 1,
           fontFamily: "'Bricolage Grotesque', sans-serif",
           textAlign: 'justify',
         }}>{s.desc}</p>
@@ -322,7 +316,6 @@ export default function About() {
       <section id="about-v2" ref={ref}>
         <div className="ab2-inner">
 
-          {/* ── HEADER ── */}
           <div className="ab2-top">
             <BlurFadeIn delay={0.1} yOffset={20}>
               <span className="ab2-eyebrow">How We Work</span>
@@ -340,14 +333,12 @@ export default function About() {
             </BlurFadeIn>
           </div>
 
-          {/* ── CARDS ── */}
           <div className="ab2-grid">
             {services.map((s, i) => (
               <MagneticCard key={i} s={s} i={i} isInView={isInView} />
             ))}
           </div>
 
-          {/* ── STRIP ── */}
           <BlurFadeIn delay={0.5} yOffset={24}>
             <div className="ab2-strip">
               <p className="ab2-strip-text">
