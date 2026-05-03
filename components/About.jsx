@@ -1,18 +1,8 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import Lottie from 'lottie-react';
 import BlurFadeIn from './BlurFadeIn';
-
-function LottieCard({ src }) {
-  const [animData, setAnimData] = useState(null);
-  useEffect(() => {
-    fetch(src).then(r => r.json()).then(setAnimData).catch(console.error);
-  }, [src]);
-  if (!animData) return <div style={{ width: 160, height: 160 }} />;
-  return <Lottie animationData={animData} loop autoplay style={{ width: 160, height: 160 }} />;
-}
 
 const services = [
   {
@@ -157,12 +147,22 @@ function MagneticCard({ s, i, isInView }) {
           transform: hovered ? 'scale(1.1)' : 'scale(0.8)',
         }} />
 
+        {/* ── STATIC IMAGE (replaces LottieCard) ── */}
         <div style={{
           transform: hovered ? 'scale(1.08) translateY(-4px)' : 'scale(1)',
           transition: 'transform 0.5s cubic-bezier(0.22,1,0.36,1)',
           position: 'relative', zIndex: 2,
         }}>
-          <LottieCard src={s.src} />
+          <img
+            src={s.src}
+            alt={s.title}
+            style={{
+              width: 200,
+              height: 160,
+              objectFit: 'contain',
+              display: 'block',
+            }}
+          />
         </div>
       </div>
 
@@ -322,7 +322,7 @@ export default function About() {
       <section id="about-v2" ref={ref}>
         <div className="ab2-inner">
 
-          {/* ── HEADER with BlurFadeIn ── */}
+          {/* ── HEADER ── */}
           <div className="ab2-top">
             <BlurFadeIn delay={0.1} yOffset={20}>
               <span className="ab2-eyebrow">How We Work</span>
@@ -340,14 +340,14 @@ export default function About() {
             </BlurFadeIn>
           </div>
 
-          {/* ── CARDS — keep existing MagneticCard motion ── */}
+          {/* ── CARDS ── */}
           <div className="ab2-grid">
             {services.map((s, i) => (
               <MagneticCard key={i} s={s} i={i} isInView={isInView} />
             ))}
           </div>
 
-          {/* ── STRIP with BlurFadeIn ── */}
+          {/* ── STRIP ── */}
           <BlurFadeIn delay={0.5} yOffset={24}>
             <div className="ab2-strip">
               <p className="ab2-strip-text">
