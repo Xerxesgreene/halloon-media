@@ -18,17 +18,17 @@ const services = [
   {
     title: 'Strategy', label: '01',
     desc: 'We chart the course. Deep-dive brand audits, market mapping, and a clear north star that aligns every decision you make.',
-    src: '/animations/ani1.json', accent: '#2D5F4D', color: '#78c69a',
+    src: '/images/1.png', accent: '#2D5F4D', color: '#78c69a',
   },
   {
     title: 'Process', label: '02',
     desc: 'Structured workflows, collaborative frameworks, and repeatable systems that keep your brand consistent at every touchpoint.',
-    src: '/animations/ani2.json', accent: '#47876F', color: '#5eb083',
+    src: '/images/3.png', accent: '#47876F', color: '#5eb083',
   },
   {
     title: 'Execution', label: '03',
     desc: 'We launch, manage, and optimise. From campaigns to content to conversions — delivered with precision and speed.',
-    src: '/animations/ani3.json', accent: '#5A9B82', color: '#3d9e6b',
+    src: '/images/2.png', accent: '#5A9B82', color: '#3d9e6b',
   },
 ];
 
